@@ -1,6 +1,6 @@
 {
-    "basic": [
-        {
+    "basic": {
+        "scalar": {
             "module": "basic",
             "kind": "type",
             "aliases": [
@@ -8,14 +8,12 @@
                 { "noun": { "singular": "number" }, "verb": { "infinitive": "number" } },
                 { "adjective": { "base": "numeric", "comparative": null, "superlative": null } }
             ],
-            "brief": "A singular count or mathematical value. Can be a fraction.",
-            "href": "scalar"
+            "brief": "A singular count or mathematical value. Can be a fraction."
         },
-        {
+        "exponent": {
             "kind": "function",
             "aliases": [{ "noun": { "singular": "exponent" } }, { "noun": { "singular": "power" } }],
-            "brief": "Multiply the base by itself [power] times.",
-            "href": "exponent"
+            "brief": "Multiply the base by itself [power] times."
         }
-    ]
+    }
 }

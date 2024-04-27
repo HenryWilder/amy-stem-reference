@@ -107,10 +107,14 @@ export interface GlossaryItem {
 
     /** Shown on the tooltip */
     brief: string;
-
-    /** Relative path (assume a '/' will be prepended) */
-    href: string;
 }
+
+export const glossaryItemToString = (item: GlossaryItem): string => {
+    const { kind, brief, propertyOf } = item;
+    const name = getItemDefaultAlias(item);
+    const propertyOfPreamble = propertyOf ? ` within ${propertyOf}` : '';
+    return `{ ${kind}${propertyOfPreamble}: ${name} - ${brief} }`;
+};
 
 export const getItemDefaultAlias = (item: GlossaryItem): string => {
     const { noun, verb, adjective } = item.aliases[0];
@@ -119,13 +123,13 @@ export const getItemDefaultAlias = (item: GlossaryItem): string => {
         verb?.infinitive ??
         adjective?.base ??
         (() => {
-            throw new Error(`The first alias of the glossary item "${item.brief}" (${item.href}) has no noun, verb, nor adjective form.`);
+            throw new Error(`The first alias of the glossary item ${glossaryItemToString(item)} has no noun, verb, nor adjective form.`);
         })()
     );
 };
 
 import glossaryData from '../../public/glossary.json';
-export const glossary: { [module: string]: GlossaryItem[] } = glossaryData;
+export const glossary: { [module: string]: { [name: string]: GlossaryItem } } = glossaryData;
 export const modules: string[] = Object.keys(glossary);
 
 export interface RefKey {
@@ -143,28 +147,41 @@ const getRefString = (key: RefKey): string => {
     return key.propertyOf ? `${key.module}::${key.propertyOf}#${key.term}` : `${key.module}::${key.term}`;
 };
 
-export const getItemModule = (item: GlossaryItem): string => {
+export type ItemPath = [string, string | undefined, string];
+
+export const getItemPath = (item: GlossaryItem): ItemPath => {
     for (const module in glossary) {
-        if (glossary[module].find((x) => x.href === item.href)) {
-            return module;
+        for (const term in glossary[module]) {
+            if (glossary[module][term] === item) {
+                return [module, item.propertyOf, term];
+            }
         }
     }
-    throw new Error(`Could not locate the item "${item.href}" in the glossary`);
+    throw new Error(`Could not locate the item ${glossaryItemToString(item)} in the glossary`);
+};
+
+export const itemPathToHref = (path: ItemPath): string => {
+    const [module, propertyOf, term] = path;
+    return `/${module}/` + (propertyOf ? `${propertyOf}#` : '') + term;
+};
+
+export const getItemHref = (item: GlossaryItem): string => itemPathToHref(getItemPath(item));
+
+export const itemPathToRefKey = (path: ItemPath): RefKey => {
+    const [module, propertyOf, term] = path;
+    return { module, propertyOf, term };
 };
 
 export const getItemRefKey = (item: GlossaryItem): RefKey => {
-    const module = getItemModule(item);
-    const propertyOf = item.propertyOf;
-    const term = getItemDefaultAlias(item);
-    return { module, propertyOf, term };
+    return itemPathToRefKey(getItemPath(item));
 };
 
 export const findReference = (key: RefKey): GlossaryItem => {
     const { module, propertyOf, term } = key;
     const termLower = term.toLowerCase();
-    const matches: GlossaryItem[] = glossary[module]
-        .filter((item) => item.propertyOf === propertyOf)
-        .filter((item) => item.aliases.find((alias) => isMatchingAlias(alias, termLower)));
+    const matches: GlossaryItem[] = Object.values(glossary[module])
+        .filter((item: GlossaryItem) => item.propertyOf === propertyOf)
+        .filter((item: GlossaryItem) => item.aliases.find((alias) => isMatchingAlias(alias, termLower)));
 
     if (matches.length === 1) {
         return matches[0];

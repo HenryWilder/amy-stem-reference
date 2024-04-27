@@ -7,6 +7,11 @@ html, body {
     margin: 0;
 }
 
+body {
+    /* Extra space gives breathing room for linking to parts of the page that are close to the bottom */
+    margin-bottom: 100vh;
+}
+
 a {
     color: inherit;
 }

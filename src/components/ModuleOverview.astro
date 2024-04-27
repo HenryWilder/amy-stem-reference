@@ -37,7 +37,7 @@ const kindToKeyword = (kind: string): ValidKeyword => {
         }
     </style>
     <ul class="glossary-list">
-        {glossary[mod].map((item: GlossaryItem) =>
+        {Object.values(glossary[mod]).map((item: GlossaryItem) =>
         <li>
             <Keyword tkn={kindToKeyword(item.kind)}/>
             <Ref key={{ module: mod, propertyOf: item.propertyOf, term: getItemDefaultAlias(item) }}/>
