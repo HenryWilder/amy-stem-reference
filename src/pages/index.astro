@@ -1,12 +1,11 @@
 ---
-import Ref from '../components/Ref.astro';
-import PageBase from '../layouts/PageBase.astro';
+import ModuleOverview from '../components/ModuleOverview.astro';
+import Comment from '../components/syntax/Comment.astro';
+import GlossaryPage from '../layouts/GlossaryPage.astro';
+import { modules } from '../scripts/glossary';
 ---
 
-<PageBase>
-	<Fragment slot="head">
-		<title>Hello world</title>
-	</Fragment>
-	<h1>Hello world</h1>
-	A <Ref text="scalar"/> is a value.
-</PageBase>
+<GlossaryPage title='Glossary'>
+	<h1><Comment>Glossary</Comment></h1>
+	{modules.map((mod: string) => <ModuleOverview mod={mod}/>)}
+</GlossaryPage>

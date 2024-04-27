@@ -1,13 +1,21 @@
-[
-    {
-        "module": "basic",
-        "kind": "type",
-        "aliases": [
-            { "noun": { "singular": "scalar" }, "adjective": { "base": "scalar", "comparative": null, "superlative": null } },
-            { "noun": { "singular": "number" }, "verb": { "infinitive": "number" } },
-            { "adjective": { "base": "numeric", "comparative": null, "superlative": null } }
-        ],
-        "brief": "A singular count or mathematical value. Can be a fraction.",
-        "href": "scalar"
-    }
-]
+{
+    "basic": [
+        {
+            "module": "basic",
+            "kind": "type",
+            "aliases": [
+                { "noun": { "singular": "scalar" }, "adjective": { "base": "scalar", "comparative": null, "superlative": null } },
+                { "noun": { "singular": "number" }, "verb": { "infinitive": "number" } },
+                { "adjective": { "base": "numeric", "comparative": null, "superlative": null } }
+            ],
+            "brief": "A singular count or mathematical value. Can be a fraction.",
+            "href": "scalar"
+        },
+        {
+            "kind": "function",
+            "aliases": [{ "noun": { "singular": "exponent" } }, { "noun": { "singular": "power" } }],
+            "brief": "Multiply the base by itself [power] times.",
+            "href": "exponent"
+        }
+    ]
+}

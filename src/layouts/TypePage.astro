@@ -1,24 +1,27 @@
 ---
-import Katex from '../components/Katex.astro';
-import { type GlossaryItem, findReference, generateAutoAliases } from '../scripts/glossary';
+import ScopeBlock from '../components/ScopeBlock.astro';
+import Comment from '../components/syntax/Comment.astro';
+import Keyword from '../components/syntax/Keyword.astro';
+import Type from '../components/syntax/Type.astro';
+import Todo from '../components/Todo.astro';
+import { type GlossaryItem, type RefKey, findReference, generateAutoAliases } from '../scripts/glossary';
 import ModulePage from './ModulePage.astro';
 
 interface Props {
-    typeName: string;
-    mod: string;
+    key: RefKey;
 }
 
-const { typeName, mod } = Astro.props;
+const { key } = Astro.props;
 
 /** Data about the item we are referencing */
-const item: GlossaryItem = findReference(typeName);
+const item: GlossaryItem = findReference(key);
 ---
 
-<ModulePage title={`${typeName} type`} module={mod}>
-    <h1><span class="keyword">type</span> <span class="type">{typeName}</span></h1>
+<ModulePage title={`${key.term} type`} module={key.module}>
+    <h1><Keyword tkn="type"/> <Type tkn={key.term}/></h1>
 
-    <div class="scope">
-        <h2 class="comment">&sol;&sol; Aliases</h2>
+    <ScopeBlock>
+        <h2 id="aliases"><Comment>Aliases</Comment></h2>
         <table class="alias-table">
             {item.aliases.map((alias) => {
                 const { noun, verb, adjective } = generateAutoAliases(alias);
@@ -59,10 +62,16 @@ const item: GlossaryItem = findReference(typeName);
             })}
         </table>
 
-        <h2 class="comment">&sol;&sol; Notation</h2>
-        <slot name="notation">&#128679; todo</slot>
+        <h2 id="notation"><Comment>Notation</Comment></h2>
+        <slot name="notation"><Todo/></slot>
 
-        <h2 class="comment">&sol;&sol; Description</h2>
-        <slot name="description">&#128679; todo</slot>
-    </div>
+        <h2 id="description"><Comment>Description</Comment></h2>
+        <slot name="description"><Todo/></slot>
+
+        <h2 id="fields"><Comment>Fields</Comment></h2>
+        <slot name="fields"><Todo/></slot>
+
+        <h2 id="methods"><Comment>Methods</Comment></h2>
+        <slot name="methods"><Todo/></slot>
+    </ScopeBlock>
 </ModulePage>

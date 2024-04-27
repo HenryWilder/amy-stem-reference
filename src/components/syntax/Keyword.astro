@@ -1,0 +1,20 @@
+---
+import { type ValidKeyword } from '../../scripts/syntax';
+
+interface Props {
+    tkn: ValidKeyword;
+}
+
+const { tkn } = Astro.props;
+---
+
+<span class="keyword">{() => {
+    switch (tkn) {
+        case '->':
+            return <>&rightarrow;</>;
+        case '=>':
+            return <>&Implies;</>;
+        default:
+            return tkn;
+    }
+}}</span>

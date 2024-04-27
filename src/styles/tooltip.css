@@ -26,6 +26,8 @@ a.here-ref {
 
 /* Tooltip text */
 .tooltip .tooltiptext {
+    font-size: 16px;
+    font-weight: normal;
     visibility: hidden;
     width: max-content;
     background-color: var(--background-tooltip);

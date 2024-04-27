@@ -1,0 +1,15 @@
+---
+import type { RefKey } from '../scripts/glossary'
+import Module from './syntax/Module.astro';
+import { glossary, findReference, getItemDefaultAlias } from '../scripts/glossary';
+
+interface Props {
+    key: RefKey;
+}
+
+const { key } = Astro.props;
+const parentItem = key.propertyOf ? findReference({ module: key.module, term: key.propertyOf }) : undefined;
+const item = findReference(key);
+---
+
+<Module tkn={key.module}/>::{parentItem && <><a class={parentItem.kind} href={parentItem.href}>{parentItem}</a>#</>}<a class={item.kind} href={item.href}>{getItemDefaultAlias(item)}</a>

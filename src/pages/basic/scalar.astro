@@ -1,0 +1,26 @@
+---
+import TypePage from '../../layouts/TypePage.astro';
+import Ref from '../../components/Ref.astro';
+import Katex from '../../components/Katex.astro';
+import Method from '../../components/Method.astro';
+import Field from '../../components/Field.astro';
+---
+
+<TypePage key={{ term: "scalar", module: "basic" }}>
+    <Fragment slot="notation">
+        <Katex tex="x"/>
+    </Fragment>
+
+    <Fragment slot="description">
+        A <Ref key={{ term: "scalar", module: "basic" }}/> is a singular count or value.
+    </Fragment>
+
+    <Fragment slot="fields">
+        <Field key={{ term: "scalar", module: "basic" }} ty="null", symbol="x">
+        </Field>
+    </Fragment>
+
+    <Fragment slot="methods">
+        <Method key={{ term: "scalar", module: "basic" }}></Method>
+    </Fragment>
+</TypePage>

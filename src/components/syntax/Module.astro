@@ -1,0 +1,9 @@
+---
+interface Props {
+    tkn: string;
+}
+
+const { tkn } = Astro.props;
+---
+
+<a class="module" href={`/${tkn}`}>{tkn}</a>

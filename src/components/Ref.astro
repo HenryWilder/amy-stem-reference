@@ -1,13 +1,14 @@
 ---
-import { type GlossaryItem, findReference } from '../scripts/glossary';
+import { type GlossaryItem, type RefKey, findReference } from '../scripts/glossary';
+import RefPath from './RefPath.astro';
+import Keyword from './syntax/Keyword.astro';
+import Module from './syntax/Module.astro';
 
 interface Props {
-    text: string;
-    /** Leave undefined if text is same as key */
-    key?: string;
+    key: RefKey;
 }
 
-const { text, key = text } = Astro.props;
+const { key } = Astro.props;
 
 /** Data about the item we are referencing */
 const item: GlossaryItem = findReference(key);
@@ -17,10 +18,9 @@ const isHereRef = Astro.url.href.match(RegExp(`.*[/#]${item.href}$`));
 ---
 
 <div class="tooltip">
-    <a href={'/' + item.href} class:list={[item.kind, isHereRef ? "here-ref" : undefined]}>{text}</a>
+    <a href={'/' + item.href} class:list={[item.kind, isHereRef ? "here-ref" : undefined]}>{key.term}</a>
     <span class="tooltiptext">
-        <span class="keyword">module</span> <span class="module">{item.module}</span><br/>
+        <RefPath key={key}/><br/><br/>
         {item.brief}
-        {!isHereRef && <><br/><br/>More information:<br/><a href={'/' + item.href}>{Astro.url.origin + '/' + item.href}</a></>}
     </span>
 </div>

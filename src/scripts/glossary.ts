@@ -90,14 +90,14 @@ const isMatchingAlias = (alias: Alias, word: string): boolean => {
 
     adjective && options.push(adjective.base, adjective.comparative, adjective.superlative, adjective.noun);
 
-    console.log(options); // For debugging
+    // console.log(options); // For debugging
 
     return options.includes(word);
 };
 
 export interface GlossaryItem {
-    /** Gives context */
-    module: string;
+    /** The type the item is a field or method of (leave undefined if the item is a type) */
+    propertyOf?: string;
 
     /** Affects reference highlighting */
     kind: string;
@@ -112,15 +112,74 @@ export interface GlossaryItem {
     href: string;
 }
 
+export const getItemDefaultAlias = (item: GlossaryItem): string => {
+    const { noun, verb, adjective } = item.aliases[0];
+    return (
+        noun?.singular ??
+        verb?.infinitive ??
+        adjective?.base ??
+        (() => {
+            throw new Error(`The first alias of the glossary item "${item.brief}" (${item.href}) has no noun, verb, nor adjective form.`);
+        })()
+    );
+};
+
 import glossaryData from '../../public/glossary.json';
+export const glossary: { [module: string]: GlossaryItem[] } = glossaryData;
+export const modules: string[] = Object.keys(glossary);
 
-const glossary: GlossaryItem[] = glossaryData;
+export interface RefKey {
+    /** The module the reference belongs to */
+    module: string;
 
-export const findReference = (key: string): GlossaryItem => {
-    const word = key.toLowerCase();
-    const item: GlossaryItem | undefined = glossary.find((item) => item.aliases.find((alias) => isMatchingAlias(alias, word)));
-    if (item === undefined) {
-        throw new Error(`Failed to locate any aliases matching "${word}" in the glossary.`);
+    /** The type the reference is a field or method of (leave undefined if the reference is a type) */
+    propertyOf?: string;
+
+    /** Any alias of the reference */
+    term: string;
+}
+
+const getRefString = (key: RefKey): string => {
+    return key.propertyOf ? `${key.module}::${key.propertyOf}#${key.term}` : `${key.module}::${key.term}`;
+};
+
+export const getItemModule = (item: GlossaryItem): string => {
+    for (const module in glossary) {
+        if (glossary[module].find((x) => x.href === item.href)) {
+            return module;
+        }
     }
-    return item;
+    throw new Error(`Could not locate the item "${item.href}" in the glossary`);
+};
+
+export const getItemRefKey = (item: GlossaryItem): RefKey => {
+    const module = getItemModule(item);
+    const propertyOf = item.propertyOf;
+    const term = getItemDefaultAlias(item);
+    return { module, propertyOf, term };
+};
+
+export const findReference = (key: RefKey): GlossaryItem => {
+    const { module, propertyOf, term } = key;
+    const termLower = term.toLowerCase();
+    const matches: GlossaryItem[] = glossary[module]
+        .filter((item) => item.propertyOf === propertyOf)
+        .filter((item) => item.aliases.find((alias) => isMatchingAlias(alias, termLower)));
+
+    if (matches.length === 1) {
+        return matches[0];
+    } else if (matches.length > 1) {
+        throw new Error(`Multiple glossary entries matching "${getRefString(key)}" exist, intent ambiguous`);
+    } else {
+        throw new Error(`No glossary entry matching "${getRefString(key)}" exists`);
+    }
+};
+
+export const isReference = (key: RefKey): boolean => {
+    try {
+        findReference(key);
+        return true;
+    } catch {
+        return false;
+    }
 };

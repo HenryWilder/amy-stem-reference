@@ -1,0 +1,9 @@
+---
+interface Props {
+    delimiters: [string, string];
+}
+
+const { delimiters } = Astro.props;
+---
+
+<span class="scope inline"><span class="scope-delimiter">{delimiters[0]}</span><slot></slot><span class="scope-delimiter">{delimiters[1]}</span></span>

@@ -1,0 +1,12 @@
+---
+import ModuleOverview from '../../components/ModuleOverview.astro';
+import Comment from '../../components/syntax/Comment.astro';
+import GlossaryPage from '../../layouts/GlossaryPage.astro';
+
+const module = "Basic";
+---
+
+<GlossaryPage title={`Module ${module}`}>
+	<h1><Comment>{module}</Comment></h1>
+	<ModuleOverview mod={module.toLowerCase()}/>
+</GlossaryPage>
