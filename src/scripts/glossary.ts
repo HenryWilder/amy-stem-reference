@@ -49,8 +49,7 @@ export const generateAutoAliases = (alias: Alias): Alias => {
 
     if (noun) {
         const { singular, plural } = noun;
-        const singularEndWithE = singular.endsWith('e') ? singular : singular + 'e';
-        result.noun = { singular: singular, plural: plural ?? singularEndWithE + 's' };
+        result.noun = { singular: singular, plural: plural ?? singular + 's' };
     }
 
     if (verb) {
@@ -91,7 +90,7 @@ const isMatchingAlias = (alias: Alias, word: string): boolean => {
 
     adjective && options.push(adjective.base, adjective.comparative, adjective.superlative, adjective.noun);
 
-    // console.log(options); // For debugging
+    console.log(options); // For debugging
 
     return options.includes(word);
 };
@@ -114,7 +113,7 @@ const glossary: GlossaryItem[] = glossaryData;
 export const findReference = (key: string): GlossaryItem => {
     const item: GlossaryItem | undefined = glossary.find((item) => item.aliases.find((alias) => isMatchingAlias(alias, key)));
     if (item === undefined) {
-        throw `Failed to locate any names nor aliases matching "${key}" in the glossary.`;
+        throw new Error(`Failed to locate any aliases matching "${key}" in the glossary.`);
     }
     return item;
 };

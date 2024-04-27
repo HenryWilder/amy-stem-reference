@@ -1,6 +1,10 @@
 [
     {
-        "aliases": [{ "noun": { "singular": "scalar" } }, { "noun": { "singular": "number" } }, { "noun": { "singular": "numeric" } }],
+        "aliases": [
+            { "noun": { "singular": "scalar" }, "adjective": { "base": "scalar" } },
+            { "noun": { "singular": "number" }, "verb": { "infinitive": "number" } },
+            { "noun": { "singular": "numeric" } }
+        ],
         "brief": "A singular count or mathematical value. Can be a fraction.",
         "href": "scalar"
     }

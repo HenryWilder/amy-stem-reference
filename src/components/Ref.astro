@@ -17,24 +17,27 @@ const item: GlossaryItem = findReference(key);
 const isHereRef = Astro.url.href.match(RegExp(`.*[/#]${item.href}$`));
 ---
 
-<span class="tooltip">
+<div class="tooltip">
     <a href={'/' + item.href} class={isHereRef && "here-ref"}>{text}</a>
     <span class="tooltiptext">
         {item.brief}
         <p>
             <strong>Aliases</strong>
             <ul>
-                {item.aliases.map(alias =>
-                <li>
-                    {[alias.noun?.singular, alias.verb?.infinitive, alias.adjective?.base].filter(alias => alias !== undefined).join(', ')}
-                </li>
-                )}
+                {item.aliases.map(alias =>{
+                    const { noun, verb, adjective } = alias;
+                    return <li>
+                        {noun && <span><span class="part-of-speech noun">noun</span>&Tab;{noun.singular}</span>}
+                        &Tab;
+                        {verb && <span><span class="part-of-speech verb">verb</span>&Tab;{verb.infinitive}</span>}
+                        &Tab;
+                        {adjective && <span><span class="part-of-speech adjective">adjective</span>&Tab;{adjective.base}</span>}
+                    </li>
+                })}
             </ul>
         </p>
-        {!isHereRef &&
         <p>
-            <a href={'/' + item.href}>{Astro.url.origin + '/' + item.href}</a>
+        {isHereRef ? <>You are already here.</> : <>More information:<br/><a href={'/' + item.href}>{Astro.url.origin + '/' + item.href}</a></>}
         </p>
-        }
     </span>
-</span>
+</div>
