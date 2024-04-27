@@ -31,14 +31,24 @@ a {
     color: seagreen;
 }
 
-.alias-table td {
-    padding-right: 4ch;
-    vertical-align: top;
-    padding-bottom: 1em;
+table.alias-table {
+    border-collapse: collapse;
 
-    .more-words {
-        color: gray;
-        font-size: small
+    tr {
+        & + tr td {
+            border-top: 1px solid #223;
+        }
+
+        td {
+            padding-right: 4ch;
+            vertical-align: top;
+            padding-block: 1em;
+
+            .more-words {
+                color: gray;
+                font-size: small
+            }
+        }
     }
 }
 
