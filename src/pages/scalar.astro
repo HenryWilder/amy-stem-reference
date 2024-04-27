@@ -1,12 +1,29 @@
 ---
 import TypePage from '../layouts/TypePage.astro';
-import katex from 'katex';
 import Ref from '../components/Ref.astro';
-
-const formula = "\\sqrt[n]{\\frac{x}{y}}";
+import Katex from '../components/Katex.astro';
 ---
 
-<TypePage typeName='Scalar'>
-    <Fragment set:html={katex.renderToString(formula)} />
-    <Ref text="scalar"/>
+<TypePage typeName='scalar' mod="basic">
+    <Fragment slot='notation'>
+        <Katex tex="\\text{hello world}"/>
+    </Fragment>
+    <Fragment slot='description'>
+        A <Ref text="scalar"/> is a singular count or value.
+        <div class="scope">
+            apple
+            <div class="scope">
+                orange
+                <div class="scope">
+                    banana
+                    <div class="scope">
+                        mango
+                        <div class="scope">
+                            pineapple
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </Fragment>
 </TypePage>

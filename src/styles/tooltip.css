@@ -20,7 +20,8 @@
 }
 
 a.here-ref {
-    text-decoration: dotted underline;
+    text-decoration: none;
+    font-weight: bold;
 }
 
 /* Tooltip text */
@@ -42,24 +43,24 @@ a.here-ref {
     p:last-child {
         margin-bottom: 0;
     }
+}
 
-    .part-of-speech {
-        user-select: none;
-        background-color: var(--background-main);
-        padding: 1px 0.5ch;
-        border-radius: 3px;
-        font-size: small;
+.part-of-speech {
+    user-select: none;
+    background-color: rgba(0, 0, 0, 0.35);
+    padding: 1px 0.5ch;
+    border-radius: 3px;
+    font-size: small;
 
-        &.noun {
-            color: dodgerblue;
-        }
+    &.noun {
+        color: dodgerblue;
+    }
 
-        &.verb {
-            color: goldenrod;
-        }
+    &.verb {
+        color: goldenrod;
+    }
 
-        &.adjective {
-            color: lightskyblue;
-        }
+    &.adjective {
+        color: lightskyblue;
     }
 }

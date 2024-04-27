@@ -1,8 +1,10 @@
 ---
 import '../styles/style.css';
 import '../styles/vars.css';
+import '../styles/tooltip.css';
 ---
 
+<!DOCTYPE html>
 <html lang="en">
 	<head>
 		<meta charset="utf-8" />
@@ -16,6 +18,10 @@ import '../styles/vars.css';
 		<meta name="viewport" content="width=device-width" />
 		<meta name="generator" content={Astro.generator} />
         <slot name="head"></slot>
+        <style>
+            .katex-version {display: none;}
+            .katex-version::after {content:"0.10.2 or earlier";}
+          </style>
 	</head>
 	<body>
         <slot></slot>

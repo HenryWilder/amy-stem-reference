@@ -1,6 +1,5 @@
 ---
 import { type GlossaryItem, findReference } from '../scripts/glossary';
-import '../styles/tooltip.css';
 
 interface Props {
     text: string;
@@ -8,7 +7,7 @@ interface Props {
     key?: string;
 }
 
-const { text, key = text.toLowerCase() } = Astro.props;
+const { text, key = text } = Astro.props;
 
 /** Data about the item we are referencing */
 const item: GlossaryItem = findReference(key);
@@ -18,26 +17,10 @@ const isHereRef = Astro.url.href.match(RegExp(`.*[/#]${item.href}$`));
 ---
 
 <div class="tooltip">
-    <a href={'/' + item.href} class={isHereRef && "here-ref"}>{text}</a>
+    <a href={'/' + item.href} class:list={[item.kind, isHereRef ? "here-ref" : undefined]}>{text}</a>
     <span class="tooltiptext">
+        <span class="keyword">module</span> <span class="module">{item.module}</span><br/>
         {item.brief}
-        <p>
-            <strong>Aliases</strong>
-            <ul>
-                {item.aliases.map(alias =>{
-                    const { noun, verb, adjective } = alias;
-                    return <li>
-                        {noun && <span><span class="part-of-speech noun">noun</span>&Tab;{noun.singular}</span>}
-                        &Tab;
-                        {verb && <span><span class="part-of-speech verb">verb</span>&Tab;{verb.infinitive}</span>}
-                        &Tab;
-                        {adjective && <span><span class="part-of-speech adjective">adjective</span>&Tab;{adjective.base}</span>}
-                    </li>
-                })}
-            </ul>
-        </p>
-        <p>
-        {isHereRef ? <>You are already here.</> : <>More information:<br/><a href={'/' + item.href}>{Astro.url.origin + '/' + item.href}</a></>}
-        </p>
+        {!isHereRef && <><br/><br/>More information:<br/><a href={'/' + item.href}>{Astro.url.origin + '/' + item.href}</a></>}
     </span>
 </div>

@@ -59,7 +59,7 @@ export const generateAutoAliases = (alias: Alias): Alias => {
         result.verb = {
             infinitive: infinitive,
             past: past ?? infinitiveEndWithE + 'd',
-            present: present ?? infinitiveEndWithE + 's',
+            present: present ?? infinitive + 's',
             continuous: continuous ?? infinitiveWithoutY + 'ing',
             future: future ?? infinitive,
         };
@@ -70,8 +70,8 @@ export const generateAutoAliases = (alias: Alias): Alias => {
         const baseIForY = base.endsWith('y') ? base.slice(0, -1) + 'i' : base;
         result.adjective = {
             base: base,
-            comparative: comparative ?? comparative === null ? base : baseIForY + 'er',
-            superlative: superlative ?? superlative === null ? base : baseIForY + 'est',
+            comparative: comparative ?? comparative === null ? 'more ' + base : baseIForY + 'er',
+            superlative: superlative ?? superlative === null ? 'most ' + base : baseIForY + 'est',
             noun: noun ?? baseIForY + 'ness',
         };
     }
@@ -96,6 +96,12 @@ const isMatchingAlias = (alias: Alias, word: string): boolean => {
 };
 
 export interface GlossaryItem {
+    /** Gives context */
+    module: string;
+
+    /** Affects reference highlighting */
+    kind: string;
+
     /** First item will be used as displayname */
     aliases: Alias[];
 
@@ -111,9 +117,10 @@ import glossaryData from '../../public/glossary.json';
 const glossary: GlossaryItem[] = glossaryData;
 
 export const findReference = (key: string): GlossaryItem => {
-    const item: GlossaryItem | undefined = glossary.find((item) => item.aliases.find((alias) => isMatchingAlias(alias, key)));
+    const word = key.toLowerCase();
+    const item: GlossaryItem | undefined = glossary.find((item) => item.aliases.find((alias) => isMatchingAlias(alias, word)));
     if (item === undefined) {
-        throw new Error(`Failed to locate any aliases matching "${key}" in the glossary.`);
+        throw new Error(`Failed to locate any aliases matching "${word}" in the glossary.`);
     }
     return item;
 };

@@ -1,0 +1,19 @@
+---
+import PageBase from './PageBase.astro';
+import { type GlossaryItem, findReference } from '../scripts/glossary';
+
+interface Props {
+    title: string;
+    module: string;
+}
+
+const { title, module } = Astro.props;
+---
+
+<PageBase>
+    <Fragment slot='head'>
+        <title>{title}</title>
+    </Fragment>
+    <strong><span class="keyword">module</span> <span class="module">{module}</span></strong>
+    <slot></slot>
+</PageBase>

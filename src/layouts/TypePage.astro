@@ -1,17 +1,68 @@
 ---
-import PageBase from './PageBase.astro';
+import Katex from '../components/Katex.astro';
+import { type GlossaryItem, findReference, generateAutoAliases } from '../scripts/glossary';
+import ModulePage from './ModulePage.astro';
 
 interface Props {
     typeName: string;
+    mod: string;
 }
 
-const { typeName } = Astro.props;
+const { typeName, mod } = Astro.props;
+
+/** Data about the item we are referencing */
+const item: GlossaryItem = findReference(typeName);
 ---
 
-<PageBase>
-    <Fragment slot='head'>
-        <title>{typeName} Type</title>
-    </Fragment>
-    <h1>{typeName}</h1>
-    <slot>&#128679; todo</slot>
-</PageBase>
+<ModulePage title={`${typeName} type`} module={mod}>
+    <h1><span class="keyword">type</span> <span class="type">{typeName}</span></h1>
+
+    <div class="scope">
+        <h2 class="comment">&sol;&sol; Aliases</h2>
+        <table class="alias-table">
+            {item.aliases.map((alias) => {
+                const { noun, verb, adjective } = generateAutoAliases(alias);
+                return <tr>
+                    <td><span class="part-of-speech noun">noun</span><br/>{noun
+                        ?
+                            <>{noun.singular.match(/^[aeiou]/) ? 'an ' : 'a '} {noun.singular}<br/>
+                            <div class="more-words">
+                                many {noun.plural}
+                            </div></>
+                        :
+                            <>&nbsp;-</>
+                    }</td>
+                    <td><span class="part-of-speech verb">verb</span><br/>{verb
+                        ?
+                            <>to {verb.infinitive}<br/>
+                            <div class="more-words">
+                                it {verb.past}<br/>
+                                it {verb.present}<br/>
+                                is {verb.continuous}<br/>
+                                will {verb.future}
+                            </div></>
+                        :
+                            <>&nbsp;-</>
+                    }</td>
+                    <td><span class="part-of-speech adjective">adjective</span><br/>{adjective
+                        ?
+                            <>is {adjective.base}<br/>
+                            <div class="more-words">
+                                {adjective.comparative} than<br/>
+                                the {adjective.superlative}<br/>
+                                has {adjective.noun}
+                            </div></>
+                        :
+                            <>&nbsp;-</>
+                    }</td>
+                </tr>
+            })}
+        </table>
+
+        <h2 class="comment">&sol;&sol; Notation</h2>
+        <slot name="notation">&#128679; todo</slot>
+
+        <h2 class="comment">&sol;&sol; Description</h2>
+        <slot name="description">&#128679; todo</slot>
+    </div>
+</ModulePage>
