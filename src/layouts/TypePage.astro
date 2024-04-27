@@ -1,0 +1,17 @@
+---
+import PageBase from './PageBase.astro';
+
+interface Props {
+    typeName: string;
+}
+
+const { typeName } = Astro.props;
+---
+
+<PageBase title={typeName}>
+    <Fragment slot='head'>
+        <title>{typeName} Type</title>
+    </Fragment>
+    <h1>{typeName}</h1>
+    <slot>&#128679; todo</slot>
+</PageBase>

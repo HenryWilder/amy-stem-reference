@@ -1,16 +1,24 @@
 ---
+import '../styles/style.css';
+import '../styles/vars.css';
+import katex from 'katex';
+import Ref from '../components/Ref.astro';
 
+const formula = "\\sqrt[n]{\\frac{x}{y}}";
 ---
 
 <html lang="en">
 	<head>
 		<meta charset="utf-8" />
 		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+		<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.10/dist/katex.min.css" integrity="sha384-wcIxkf4k558AjM3Yz3BBFQUbk/zgIYC2R0QpeeYb+TwlBVMrlgLqwRjRtGZiK7ww" crossorigin="anonymous">
 		<meta name="viewport" content="width=device-width" />
 		<meta name="generator" content={Astro.generator} />
 		<title>Astro</title>
 	</head>
 	<body>
-		<h1>Astro</h1>
+		<h1>Hello World!</h1>
+		<Fragment set:html={katex.renderToString(formula)} />
+		<Ref text="scalar"/>
 	</body>
 </html>

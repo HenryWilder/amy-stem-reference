@@ -1,0 +1,40 @@
+---
+import { type GlossaryItem, findReference } from '../scripts/glossary';
+import '../styles/tooltip.css';
+
+interface Props {
+    text: string;
+    /** Leave undefined if text is same as key */
+    key?: string;
+}
+
+const { text, key = text.toLowerCase() } = Astro.props;
+
+/** Data about the item we are referencing */
+const item: GlossaryItem = findReference(key);
+
+/** Reference leads to the page we are already on */
+const isHereRef = Astro.url.href.match(RegExp(`.*[/#]${item.href}$`));
+---
+
+<span class="tooltip">
+    <a href={'/' + item.href} class={isHereRef && "here-ref"}>{text}</a>
+    <span class="tooltiptext">
+        {item.brief}
+        <p>
+            <strong>Aliases</strong>
+            <ul>
+                {item.aliases.map(alias =>
+                <li>
+                    {[alias.noun?.singular, alias.verb?.infinitive, alias.adjective?.base].filter(alias => alias !== undefined).join(', ')}
+                </li>
+                )}
+            </ul>
+        </p>
+        {!isHereRef &&
+        <p>
+            <a href={'/' + item.href}>{Astro.url.origin + '/' + item.href}</a>
+        </p>
+        }
+    </span>
+</span>

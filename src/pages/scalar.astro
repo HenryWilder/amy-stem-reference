@@ -1,0 +1,12 @@
+---
+import TypePage from '../layouts/TypePage.astro';
+import katex from 'katex';
+import Ref from '../components/Ref.astro';
+
+const formula = "\\sqrt[n]{\\frac{x}{y}}";
+---
+
+<TypePage typeName='Scalar'>
+    <Fragment set:html={katex.renderToString(formula)} />
+    <Ref text="scalar"/>
+</TypePage>

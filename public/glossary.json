@@ -1,7 +1,7 @@
 [
     {
-        "name": "",
-        "aliases": [],
-        "brief": ""
+        "aliases": [{ "noun": { "singular": "scalar" } }, { "noun": { "singular": "number" } }, { "noun": { "singular": "numeric" } }],
+        "brief": "A singular count or mathematical value. Can be a fraction.",
+        "href": "scalar"
     }
 ]

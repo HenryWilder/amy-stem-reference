@@ -1,0 +1,41 @@
+/* copied from https://www.w3schools.com/css/css_tooltip.asp */
+
+.tooltip .tooltiptext {
+    top: -5px;
+    left: 105%;
+}
+
+.tooltip .tooltiptext {
+    top: -5px;
+    left: 105%;
+}
+
+/* Tooltip container */
+.tooltip {
+    position: relative;
+    display: inline-block;
+    color: white;
+}
+
+a.here-ref {
+    text-decoration: dotted underline;
+}
+
+/* Tooltip text */
+.tooltip .tooltiptext {
+    visibility: hidden;
+    width: 300px;
+    background-color: var(--background-tooltip);
+    color: #fff;
+    padding: 0.5rem 1ch;
+    border-radius: 6px;
+
+    /* Position the tooltip text - see examples below! */
+    position: absolute;
+    z-index: 1;
+}
+
+/* Show the tooltip text when you mouse over the tooltip container */
+.tooltip:hover .tooltiptext {
+    visibility: visible;
+}
