@@ -19,4 +19,6 @@ const pathItems: { kind: Kind, href: string, part: string }[] = path.slice(1).ma
 });
 ---
 
-<Module tkn={module}/>{pathItems.map(({ kind, href, part }) => <>::<a class={kind} href={href}>{part}</a></>)}
+<Module tkn={module}/>{pathItems.map(({ kind, href, part }, index) =>
+    <><span style="cursor:default">::</span><a class={kind} href={href}>{part}</a></>
+)}
