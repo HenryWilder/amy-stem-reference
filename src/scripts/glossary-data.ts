@@ -36,7 +36,7 @@ export const glossary: Glossary = {
             properties: {
                 pow: {
                     kind: 'function',
-                    aliases: ['Exponent'],
+                    aliases: ['Exponent', 'Raise to the Power of'],
                     description: [
                         [ref('Multiply', 'mul'), ' the ', ref('base'), ' by ', ref('itself', 'base'), ' ', ref('power'), '-times.'],
                         [
@@ -74,12 +74,12 @@ export const glossary: Glossary = {
                 },
                 add: {
                     kind: 'function',
-                    aliases: ['Addition', 'Add'],
+                    aliases: ['Add', 'Addition'],
                     description: [['todo']],
                 },
                 sub: {
                     kind: 'function',
-                    aliases: ['Subtraction', 'Less', 'Sub', 'Minus'],
+                    aliases: ['Subtract', 'Subtraction', 'Minus', 'Less'],
                     description: [['todo']],
                 },
                 mul: {

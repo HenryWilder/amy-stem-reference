@@ -11,13 +11,13 @@
         padding: 0.5rem 0.5rem;
         border-top-left-radius: 6px;
         border-top-right-radius: 6px;
-        transition: background-color 200ms;
+        transition: background-color 100ms 360ms;
 
         /* Show the tooltip text when you mouse over the tooltip container */
         .tooltiptext {
             visibility: visible;
             opacity: 100%;
-            transition: 200ms;
+            transition: 100ms 360ms;
         }
     }
 }

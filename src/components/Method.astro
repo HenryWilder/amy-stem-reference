@@ -1,7 +1,9 @@
 ---
-import type { ItemPath } from '../scripts/glossary';
+import { getGlossaryItem, type ItemPath } from '../scripts/glossary';
 import Ref from './Ref.astro';
 import ScopeBlock from './ScopeBlock.astro';
+import ScopeInline from './ScopeInline.astro';
+import Comment from './syntax/Comment.astro';
 import Keyword from './syntax/Keyword.astro';
 import Todo from './Todo.astro';
 
@@ -10,9 +12,15 @@ interface Props {
 }
 
 const { path } = Astro.props;
+const item = getGlossaryItem(path);
+const fields = item.properties ? Object.entries(item.properties).filter(([_, item]) => item.kind === 'field').map(([key, item]) => ({ key, item })) : [];
 ---
 
-<h3><Ref path={path} mustBe="function"/></h3>
-<ScopeBlock>
-    <slot><Todo/></slot>
-</ScopeBlock>
+<h3><Comment>{item.aliases[0]}</Comment></h3>
+<Keyword tkn="function"/>
+<Ref path={path} mustBe="function"
+/><ScopeInline delimiters={['(', ')']}>{fields.map(({ key, item }, index) =>
+    <><Ref path={[...path, key]}/><span class="punctuation">: </span><Ref path={item.fieldData!.ty}/>{
+        index !== fields.length - 1 && <span class="punctuation">, </span>
+    }</>
+)}</ScopeInline> <Keyword tkn="->"/> <Ref path={['basic', 'scalar']}/>
