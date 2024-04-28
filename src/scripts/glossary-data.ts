@@ -27,30 +27,23 @@ export const relToPath = (startIn: ItemPath, rel: string[]): ItemPath => {
 
     // Look around inside the glossary at this level, then go up one level at a time. Never go deeper than 1 level without matching rel.
     while (true) {
-        console.log(`Searching in '${rootPathToStr(upPath)}' for '${rootPathToStr(rel)}'`);
-        for (const key in getGlossaryLayer(upPath)) {
-            console.log(' ', key);
-            if (key === rel[0]) {
-                console.log(`Found '${key}' in '${rootPathToStr(upPath)}'`);
-                const downPath = [...upPath];
-                let fullPathMatch = true;
-                for (const part of rel) {
-                    console.log(`Looking for '${part}' in '${rootPathToStr(downPath)}'`);
-                    const layer = getGlossaryLayer(downPath);
-                    if (layer && Object.keys(layer).includes(part)) {
-                        console.log(`Found for '${part}' in '${rootPathToStr(downPath)}'`);
-                        downPath.push(part);
-                    } else {
-                        console.log(`Could not find '${part}' in '${rootPathToStr(downPath)}', cancelling this downPath`);
-                        fullPathMatch = false;
-                        break;
-                    }
-                }
-                if (fullPathMatch) {
-                    console.log(`Successfully located ${rootPathToStr(downPath)}`);
-                    return downPath as ItemPath;
-                }
+        const downPath = [...upPath];
+        let fullPathMatch = true;
+        for (const part of rel) {
+            const layer = getGlossaryLayer(downPath);
+            console.log(`Checking for '${part}' in '${rootPathToStr(downPath)}::[${layer ? Object.keys(layer).join(', ') : ''}]'`);
+            if (layer && part in layer) {
+                // console.log(`  Success`);
+                downPath.push(part);
+            } else {
+                // console.log(`  Failed`);
+                fullPathMatch = false;
+                break;
             }
+        }
+        if (fullPathMatch) {
+            console.log(`Successfully matched '${rootPathToStr(rel)}' to '${rootPathToStr(downPath)}'`);
+            return downPath as ItemPath;
         }
         if (upPath.length === 0) break;
         upPath.pop();
@@ -69,16 +62,7 @@ export const glossary: Glossary = {
                     kind: 'function',
                     aliases: ['Exponent', 'Raise to the Power of'],
                     description: [
-                        [
-                            ref('Multiply', 'scalar::mul'),
-                            ' the ',
-                            ref('base', 'basic::scalar::pow::base'),
-                            ' by ',
-                            ref('itself', 'basic::scalar::pow::base'),
-                            ' ',
-                            ref('power', 'basic::scalar::pow::power'),
-                            '-times.',
-                        ],
+                        [ref('Multiply', 'mul'), ' the ', ref('base'), ' by ', ref('itself', 'base'), ' ', ref('power'), '-times.'],
                         [
                             tex(
                                 '\\def\\xn#1{\\overset{\\tiny#1}{x}}' +
@@ -95,7 +79,7 @@ export const glossary: Glossary = {
                         base: {
                             kind: 'field',
                             aliases: ['Base'],
-                            description: [['The number being ', ref('multiplied', 'basic::scalar::mul'), ' by itself.']],
+                            description: [['The number being ', ref('multiplied', 'mul'), ' by itself.']],
                             fieldData: {
                                 ty: ['basic', 'scalar'],
                                 notationRef: 'x',
@@ -104,16 +88,7 @@ export const glossary: Glossary = {
                         power: {
                             kind: 'field',
                             aliases: ['Power'],
-                            description: [
-                                [
-                                    'The number of times to ',
-                                    ref('multiply', 'basic::scalar::mul'),
-                                    ' the ',
-                                    ref('base', 'basic::scalar::pow::base'),
-                                    ' by ',
-                                    ref('itself', 'basic::scalar::pow::base'),
-                                ],
-                            ],
+                            description: [['The number of times to ', ref('multiply', 'mul'), ' the ', ref('base'), ' by ', ref('itself', 'base')]],
                             fieldData: {
                                 ty: ['basic', 'scalar'],
                                 notationRef: 'y',
