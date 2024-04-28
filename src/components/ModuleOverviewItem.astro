@@ -10,7 +10,6 @@ interface Props {
 const { path } = Astro.props;
 
 const propertiesObj = getGlossaryItem(path).properties;
-console.log(path, propertiesObj);
 const propertyList: ItemPath[] = propertiesObj ? Object.keys(propertiesObj).map((key) => [...path, key]) : [];
 ---
 

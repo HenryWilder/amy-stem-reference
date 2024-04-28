@@ -12,9 +12,7 @@ interface Props {
 const { path } = Astro.props;
 ---
 
-<h3>
-    <Keyword tkn="operator"/> <Ref path={path} mustBe="function"/>
-</h3>
+<h3><Ref path={path} mustBe="function"/></h3>
 <ScopeBlock>
     <slot><Todo/></slot>
 </ScopeBlock>

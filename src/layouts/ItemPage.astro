@@ -1,0 +1,62 @@
+---
+import Field from '../components/Field.astro';
+import Katex from '../components/Katex.astro';
+import Method from '../components/Method.astro';
+import Ref from '../components/Ref.astro';
+import ScopeBlock from '../components/ScopeBlock.astro';
+import Comment from '../components/syntax/Comment.astro';
+import Keyword from '../components/syntax/Keyword.astro';
+import { type GlossaryItem, type ItemPath, getGlossaryItem } from '../scripts/glossary';
+import type { ValidKeyword } from '../scripts/syntax';
+import ModulePage from './ModulePage.astro';
+
+interface Props {
+    path: ItemPath;
+}
+
+const { path } = Astro.props;
+
+/** Data about the item we are referencing */
+const item: GlossaryItem = getGlossaryItem(path);
+
+type GlossaryEntry = { path: ItemPath, item: GlossaryItem };
+
+const properties: GlossaryEntry[] = item.properties ? Object.entries(item.properties).map(([key, item]) => ({ path: [...path, key], item })) : [];
+const fieldProps: GlossaryEntry[] = properties.filter(({ item }) => item.kind === 'field');
+const functionProps: GlossaryEntry[] = properties.filter(({ item }) => item.kind === 'function');
+---
+
+<ModulePage path={path}>
+    <h1><Keyword tkn={item.kind as ValidKeyword}/> <Ref path={path}/></h1>
+
+    <ScopeBlock>
+        <h2 id="description"><Comment>Description</Comment></h2>
+        <div>
+            {item.description}
+        </div>
+
+        <h2 id="aliases"><Comment>Aliases</Comment></h2>
+        <ul class="alias-list">
+            {item.aliases.map((alias: string) => <li>{alias}</li>)}
+        </ul>
+
+        {item.notation && <>
+            <h2 id="notation"><Comment>Notation</Comment></h2>
+            <Katex tex={item.notation}/>
+        </>}
+
+        {fieldProps.length !== 0 && <>
+            <h2 id="fields"><Comment>Fields</Comment></h2>
+            <ScopeBlock>
+                {fieldProps.map(({ path, item }) => <Field path={path} ty={item.fieldData!.ty} symbol={item.fieldData!.notationRef}/>)}
+            </ScopeBlock>
+        </>}
+
+        {functionProps.length !== 0 && <>
+            <h2 id="methods"><Comment>Methods</Comment></h2>
+            <ScopeBlock>
+                {functionProps.map(({ path }) => <Method path={path}/>)}
+            </ScopeBlock>
+        </>}
+    </ScopeBlock>
+</ModulePage>

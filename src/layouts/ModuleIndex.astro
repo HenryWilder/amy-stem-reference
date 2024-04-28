@@ -1,0 +1,16 @@
+---
+import ModuleOverview from "../components/ModuleOverview.astro";
+import Comment from "../components/syntax/Comment.astro";
+import GlossaryPage from "./GlossaryPage.astro";
+
+interface Props {
+    module: string;
+}
+
+const { module } = Astro.props;
+---
+
+<GlossaryPage title={module}>
+    <h1><Comment>The {module} module</Comment></h1>
+    <ModuleOverview mod={module}/>
+</GlossaryPage>

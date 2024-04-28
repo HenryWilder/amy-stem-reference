@@ -3,19 +3,32 @@ import PageBase from './PageBase.astro';
 import Todo from '../components/Todo.astro';
 import Keyword from '../components/syntax/Keyword.astro';
 import Module from '../components/syntax/Module.astro';
+import { getGlossaryItem, type GlossaryItem, type ItemPath } from '../scripts/glossary';
+import Ref from '../components/Ref.astro';
+import type { ValidKeyword } from '../scripts/syntax';
 
 interface Props {
-    title: string;
-    module: string;
+    path: ItemPath;
 }
 
-const { title, module } = Astro.props;
+const { path } = Astro.props;
+const module = path[0];
+const items: { kw: ValidKeyword, subPath: ItemPath, item: GlossaryItem }[] = path.slice(1).map((key, index) => {
+    index += 1;
+    const subPath: ItemPath = [module, ...path.slice(1, index), key];
+    const item = getGlossaryItem(subPath);
+    const kw: ValidKeyword = item.kind;
+    return { kw, subPath, item }
+});
 ---
 
 <PageBase>
     <Fragment slot='head'>
-        <title>{title}</title>
+        <title>{path.at(-1)}</title>
     </Fragment>
-    <strong><Keyword tkn="module"/> <Module tkn={module}/></strong>
-    <slot><Todo/></slot>
+    <strong>
+        <Keyword tkn="module"/> <Module tkn={module}/>
+        {items.map(({ kw, subPath }) => <> :: <Keyword tkn={kw}/> <Ref path={subPath}/></>)}
+    </strong>
+    <slot></slot>
 </PageBase>

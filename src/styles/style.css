@@ -38,29 +38,25 @@ a {
     cursor: default;
 }
 
+h3 {
+    margin-bottom: 0;
+
+    &:first-child {
+        margin-top: 0px;
+    }
+}
+
 .field {
     color: lightskyblue;
 }
 
-table.alias-table {
-    border-collapse: collapse;
+.trait {
+    color: tomato;
+}
 
-    tr {
-        & + tr td {
-            border-top: 1px solid #223;
-        }
-
-        td {
-            padding-right: 4ch;
-            vertical-align: top;
-            padding-block: 1em;
-
-            .more-words {
-                color: gray;
-                font-size: small
-            }
-        }
-    }
+ul.alias-list {
+    list-style-type: square;
+    padding-left: 2ch;
 }
 
 .scope {

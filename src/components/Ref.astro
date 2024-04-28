@@ -27,6 +27,6 @@ if (mustBe !== undefined && item.kind !== mustBe) {
     <a href={itemPathToHref(path)} class={item.kind}>{text}</a>
     <span class="tooltiptext">
         <RefPath path={path}/><br/><br/>
-        {item.brief}
+        {item.description[0]}
     </span>
 </div>

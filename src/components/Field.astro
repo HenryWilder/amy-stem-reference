@@ -1,24 +1,17 @@
 ---
-import { isValidKeyword, type ValidKeyword } from "../scripts/syntax";
 import { type ItemPath } from '../scripts/glossary';
 import Ref from "./Ref.astro";
-import Keyword from "./syntax/Keyword.astro";
 import Comment from "./syntax/Comment.astro";
 import Katex from "./Katex.astro";
 
 interface Props {
     path: ItemPath;
-    ty: ItemPath | ValidKeyword;
+    ty: ItemPath;
     symbol: string;
 }
 
 const { path, ty, symbol } = Astro.props;
 ---
 
-<Ref path={path}/>: {() => {
-    if (isValidKeyword(ty)) {
-        return <Keyword tkn={ty}/>;
-    } else {
-        return <Ref path={ty}/>;
-    }
-}}; <Comment>Symbol in <a href="#notation">notation</a>: <Katex tex={symbol}></Comment>
+<h3><Comment><Katex tex={symbol}></Comment> in <a href="#notation">notation</a></h3>
+<Ref path={path} mustBe="field"/>: <Ref path={ty} mustBe="type"/>
