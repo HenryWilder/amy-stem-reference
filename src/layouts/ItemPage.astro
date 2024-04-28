@@ -1,5 +1,6 @@
 ---
 import Field from '../components/Field.astro';
+import ItemDescription from '../components/ItemDescription.astro';
 import Katex from '../components/Katex.astro';
 import Method from '../components/Method.astro';
 import Ref from '../components/Ref.astro';
@@ -30,11 +31,6 @@ const functionProps: GlossaryEntry[] = properties.filter(({ item }) => item.kind
     <h1><Keyword tkn={item.kind as ValidKeyword}/> <Ref path={path}/></h1>
 
     <ScopeBlock>
-        <h2 id="description"><Comment>Description</Comment></h2>
-        <div>
-            {item.description}
-        </div>
-
         <h2 id="aliases"><Comment>Aliases</Comment></h2>
         <ul class="alias-list">
             {item.aliases.map((alias: string) => <li>{alias}</li>)}
@@ -44,6 +40,9 @@ const functionProps: GlossaryEntry[] = properties.filter(({ item }) => item.kind
             <h2 id="notation"><Comment>Notation</Comment></h2>
             <Katex tex={item.notation}/>
         </>}
+
+        <h2 id="description"><Comment>Description</Comment></h2>
+        <ItemDescription path={path} item={item} isBrief={false}/>
 
         {fieldProps.length !== 0 && <>
             <h2 id="fields"><Comment>Fields</Comment></h2>

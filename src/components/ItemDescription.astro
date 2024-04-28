@@ -1,0 +1,34 @@
+---
+import type { ItemLink } from '../scripts/glossary';
+import { getGlossaryItem, type GlossaryItem, type ItemPath, type DescriptionLine } from '../scripts/glossary';
+import { relToPath } from '../scripts/glossary-data';
+import Katex from './Katex.astro';
+import LilRef from './LilRef.astro';
+import Ref from './Ref.astro';
+
+interface Props {
+    /** If true: only use the first line of the description */
+    isBrief: boolean;
+    path: ItemPath;
+    item?: GlossaryItem;
+}
+
+const { isBrief, path, item = getGlossaryItem(path) } = Astro.props;
+
+const description: DescriptionLine[] = isBrief ? [item.description[0]] : item.description;
+
+const isTex = (x: ItemLink | { tex: string }): x is { tex: string } => Object.hasOwn(x, 'tex');
+---
+
+{
+    description.map((line) => <p style="white-space: nowrap">{
+        line.map((segment) =>
+            typeof segment === 'string'
+                ? segment
+                : isTex(segment)
+                    ? <Katex tex={segment.tex}/>
+                    : (isBrief // Using tooltips inside of tooltips could risk infinite recursion.
+                        ? <LilRef text={segment.text} path={relToPath(path, segment.rel)}/>
+                        : <Ref text={segment.text} path={relToPath(path, segment.rel)}/>)
+        )}</p>)
+}

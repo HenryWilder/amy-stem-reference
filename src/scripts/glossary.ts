@@ -1,5 +1,12 @@
 export type Kind = 'function' | 'type' | 'field' | 'trait';
 
+export interface ItemLink {
+    text: string;
+    rel: string[];
+}
+
+export type DescriptionLine = (string | ItemLink | { tex: string })[];
+
 export interface GlossaryItem {
     /** Affects reference highlighting */
     kind: Kind;
@@ -8,7 +15,7 @@ export interface GlossaryItem {
     aliases: string[];
 
     /** Each element represents a separate paragraph. The first paragraph will be shown on the tooltip */
-    description: string[];
+    description: DescriptionLine[];
 
     /** Should be valid KaTeX */
     notation?: string;
@@ -63,10 +70,10 @@ export const getGlossaryItem = (path: ItemPath): GlossaryItem => {
             if (property !== undefined) {
                 current = property;
             } else {
-                throw new Error(`${part} is not a property of "${subPath}". The valid properties are: [${Object.keys(current.properties).join(', ')}]`);
+                throw new Error(`'${part}' is not a property of "${subPath}". The valid properties are: [${Object.keys(current.properties).join(', ')}]`);
             }
         } else {
-            throw new Error(`"${subPath}" has no properties (looking for '${part}')`);
+            throw new Error(`'${subPath}' has no properties (looking for '${part}')`);
         }
     });
 

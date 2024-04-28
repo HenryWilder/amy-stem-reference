@@ -1,5 +1,6 @@
 ---
 import { type ItemPath, type GlossaryItem, type Kind, getGlossaryItem, itemPathToHref } from '../scripts/glossary';
+import ItemDescription from './ItemDescription.astro';
 import RefPath from './RefPath.astro';
 
 interface Props {
@@ -27,6 +28,6 @@ if (mustBe !== undefined && item.kind !== mustBe) {
     <a href={itemPathToHref(path)} class={item.kind}>{text}</a>
     <span class="tooltiptext">
         <RefPath path={path}/><br/><br/>
-        {item.description[0]}
+        <ItemDescription path={path} item={item} isBrief={true}/>
     </span>
 </div>

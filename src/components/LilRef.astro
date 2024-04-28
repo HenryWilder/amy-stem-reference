@@ -1,0 +1,19 @@
+---
+import { type ItemPath, type GlossaryItem, type Kind, getGlossaryItem, itemPathToHref } from '../scripts/glossary';
+
+interface Props {
+    /** Path to the reference */
+    path: ItemPath;
+
+    /** Data about the item we are referencing */
+    item?: GlossaryItem;
+
+    /** The text to display - defaults to the final part of `path` */
+    text?: string;
+}
+
+const { path, text = path.at(-1), item = getGlossaryItem(path) } = Astro.props;
+const href = itemPathToHref(path);
+---
+
+<a href={href} class={item.kind}>{text}</a>

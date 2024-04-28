@@ -28,7 +28,7 @@ const items: { kw: ValidKeyword, subPath: ItemPath, item: GlossaryItem }[] = pat
     </Fragment>
     <strong>
         <Keyword tkn="module"/> <Module tkn={module}/>
-        {items.map(({ kw, subPath }) => <> :: <Keyword tkn={kw}/> <Ref path={subPath}/></>)}
+        {items.map(({ kw, subPath }) => <><span class="no-touchy"> :: </span><Keyword tkn={kw}/> <Ref path={subPath}/></>)}
     </strong>
     <slot></slot>
 </PageBase>
