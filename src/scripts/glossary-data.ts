@@ -1,6 +1,7 @@
-import { getGlossaryItem, type Glossary, type ItemLink, type ItemPath } from './glossary';
+import { getGlossaryItem, type DescriptionLine, type Glossary, type ItemLink, type ItemPath } from './glossary';
 
 const ref = (text: string, rel: string = text.toLowerCase()): ItemLink => {
+    console.log(rel.split('::'));
     return { text, rel: rel.split('::') };
 };
 
@@ -9,22 +10,52 @@ const tex = (tex: string) => {
 };
 
 export const relToPath = (startIn: ItemPath, rel: string[]): ItemPath => {
-    let absPath: ItemPath = [...startIn];
+    const upPath: ItemPath = [...startIn];
+
+    const rootPathToStr = (path: string[]) => (path.length !== 0 ? path.join('::') : '[ROOT]');
+
+    const getGlossaryLayer = (path: string[]): { [key: string]: object } | undefined => {
+        switch (path.length) {
+            case 0:
+                return glossary;
+            case 1:
+                return glossary[path[0]];
+            default:
+                return getGlossaryItem(path as ItemPath).properties;
+        }
+    };
+
     // Look around inside the glossary at this level, then go up one level at a time. Never go deeper than 1 level without matching rel.
-    while (absPath.length > 0) {
-        console.log(`Searching in '${absPath.join('::')}' for '${rel.join('::')}'`);
-        const searchItem = getGlossaryItem(absPath);
-        for (const key in searchItem.properties) {
+    while (true) {
+        console.log(`Searching in '${rootPathToStr(upPath)}' for '${rootPathToStr(rel)}'`);
+        for (const key in getGlossaryLayer(upPath)) {
             console.log(' ', key);
             if (key === rel[0]) {
-                absPath.push(...rel);
-                console.log(`Successfully located ${absPath.join('::')}`);
-                return absPath;
+                console.log(`Found '${key}' in '${rootPathToStr(upPath)}'`);
+                const downPath = [...upPath];
+                let fullPathMatch = true;
+                for (const part of rel) {
+                    console.log(`Looking for '${part}' in '${rootPathToStr(downPath)}'`);
+                    const layer = getGlossaryLayer(downPath);
+                    if (layer && Object.keys(layer).includes(part)) {
+                        console.log(`Found for '${part}' in '${rootPathToStr(downPath)}'`);
+                        downPath.push(part);
+                    } else {
+                        console.log(`Could not find '${part}' in '${rootPathToStr(downPath)}', cancelling this downPath`);
+                        fullPathMatch = false;
+                        break;
+                    }
+                }
+                if (fullPathMatch) {
+                    console.log(`Successfully located ${rootPathToStr(downPath)}`);
+                    return downPath as ItemPath;
+                }
             }
         }
-        absPath.pop();
+        if (upPath.length === 0) break;
+        upPath.pop();
     }
-    throw new Error(`No path found for the rel '${rel.join('::')}' starting in '${startIn.join('::')}'`);
+    throw new Error(`No path found for the rel '${rootPathToStr(rel)}' starting in '${rootPathToStr(startIn)}'`);
 };
 
 export const glossary: Glossary = {
@@ -38,7 +69,16 @@ export const glossary: Glossary = {
                     kind: 'function',
                     aliases: ['Exponent', 'Raise to the Power of'],
                     description: [
-                        [ref('Multiply', 'mul'), ' the ', ref('base'), ' by ', ref('itself', 'base'), ' ', ref('power'), '-times.'],
+                        [
+                            ref('Multiply', 'scalar::mul'),
+                            ' the ',
+                            ref('base', 'basic::scalar::pow::base'),
+                            ' by ',
+                            ref('itself', 'basic::scalar::pow::base'),
+                            ' ',
+                            ref('power', 'basic::scalar::pow::power'),
+                            '-times.',
+                        ],
                         [
                             tex(
                                 '\\def\\xn#1{\\overset{\\tiny#1}{x}}' +
@@ -55,7 +95,7 @@ export const glossary: Glossary = {
                         base: {
                             kind: 'field',
                             aliases: ['Base'],
-                            description: [['The number being ', ref('multiplied', 'mul'), ' by itself.']],
+                            description: [['The number being ', ref('multiplied', 'basic::scalar::mul'), ' by itself.']],
                             fieldData: {
                                 ty: ['basic', 'scalar'],
                                 notationRef: 'x',
@@ -64,7 +104,16 @@ export const glossary: Glossary = {
                         power: {
                             kind: 'field',
                             aliases: ['Power'],
-                            description: [['The number of times to ', ref('multiply', 'mul'), ' the ', ref('base'), ' by ', ref('itself', 'base')]],
+                            description: [
+                                [
+                                    'The number of times to ',
+                                    ref('multiply', 'basic::scalar::mul'),
+                                    ' the ',
+                                    ref('base', 'basic::scalar::pow::base'),
+                                    ' by ',
+                                    ref('itself', 'basic::scalar::pow::base'),
+                                ],
+                            ],
                             fieldData: {
                                 ty: ['basic', 'scalar'],
                                 notationRef: 'y',
@@ -100,4 +149,4 @@ export const glossary: Glossary = {
             description: [['todo']],
         },
     },
-} as const;
+};
