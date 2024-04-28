@@ -1,7 +1,6 @@
 ---
-import { getItemDefaultAlias, glossary, type GlossaryItem } from "../scripts/glossary";
-import type { ValidKeyword } from "../scripts/syntax";
-import Ref from "./Ref.astro";
+import { type ItemPath, getGlossaryItem, glossary } from "../scripts/glossary";
+import ModuleOverviewItem from "./ModuleOverviewItem.astro";
 import ScopeBlock from "./ScopeBlock.astro";
 import Keyword from "./syntax/Keyword.astro";
 import Module from "./syntax/Module.astro";
@@ -11,37 +10,13 @@ interface Props {
 }
 
 const { mod } = Astro.props;
-const kindToKeyword = (kind: string): ValidKeyword => {
-    switch (kind) {
-        case 'type':
-            return 'type';
-        case 'function':
-            return "fn";
-        default:
-            throw new Error(`The kind "${kind}" is not a valid kind, or does not have an associated keyword mapping`);
-    }
-};
+
+const list: ItemPath[] = Object.keys(glossary[mod]).map((key: string) => [mod, key]);
 ---
 
 <h2><Keyword tkn="module"/> <Module tkn={mod}/></h2>
 <ScopeBlock>
-    <style>
-        .glossary-list {
-            padding: 0;
-            list-style-type: none;
-            gap: 1em;
-
-            li:not(:last-child) {
-                margin-bottom: 1em;
-            }
-        }
-    </style>
     <ul class="glossary-list">
-        {Object.values(glossary[mod]).map((item: GlossaryItem) =>
-        <li>
-            <Keyword tkn={kindToKeyword(item.kind)}/>
-            <Ref key={{ module: mod, propertyOf: item.propertyOf, term: getItemDefaultAlias(item) }}/>
-        </li>
-        )}
+        {list.map((path) => <li><ModuleOverviewItem path={path}/></li>)}
     </ul>
 </ScopeBlock>

@@ -1,4 +1,4 @@
-/* copied from https://www.w3schools.com/css/css_tooltip.asp */
+/* use https://www.w3schools.com/css/css_tooltip.asp for reference */
 
 /* Tooltip container */
 .tooltip {
@@ -11,10 +11,13 @@
         padding: 0.5rem 0.5rem;
         border-top-left-radius: 6px;
         border-top-right-radius: 6px;
+        transition: background-color 200ms;
 
         /* Show the tooltip text when you mouse over the tooltip container */
         .tooltiptext {
             visibility: visible;
+            opacity: 100%;
+            transition: 200ms;
         }
     }
 }
@@ -28,6 +31,7 @@ a.here-ref {
 .tooltip .tooltiptext {
     font-size: 16px;
     font-weight: normal;
+    opacity: 0;
     visibility: hidden;
     width: max-content;
     background-color: var(--background-tooltip);

@@ -94,9 +94,24 @@ table.alias-table {
         border-radius: 1rem;
         padding: 1em 2ch;
         margin: 1em 0;
+        transition: 70ms ease-in-out;
+
+        &:not(:hover) {
+            background-color: color-mix(in srgb, var(--scope-color) 5%, transparent);
+        }
     }
 
     &.inline > .scope-delimiter {
         color: var(--scope-color);
+    }
+}
+
+.glossary-list {
+    padding: 0;
+    list-style-type: none;
+    gap: 1em;
+
+    li:not(:last-child) {
+        margin-bottom: 1em;
     }
 }

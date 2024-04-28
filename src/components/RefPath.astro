@@ -1,17 +1,22 @@
 ---
-import type { RefKey } from '../scripts/glossary'
 import Module from './syntax/Module.astro';
-import { getItemHref, findReference, getItemDefaultAlias, getItemPath } from '../scripts/glossary';
+import { type GlossaryItem, type ItemPath, type Kind, getGlossaryItem, itemPathToHref } from '../scripts/glossary';
 
 interface Props {
-    key: RefKey;
+    path: ItemPath;
 }
 
-const { key } = Astro.props;
-const parentItem = key.propertyOf ? findReference({ module: key.module, term: key.propertyOf }) : undefined;
-const item = findReference(key);
+const { path } = Astro.props;
+const module = path[0];
+
+const pathItems: { kind: Kind, href: string, part: string }[] = path.slice(1).map((part: string, index: number) => {
+    index += 1; // Account for slice
+    const subPath: ItemPath = [module, ...path.slice(1, index), part];
+    const item: GlossaryItem = getGlossaryItem(subPath);
+    const kind: Kind = item.kind;
+    const href: string = itemPathToHref(subPath);
+    return { kind, href, part };
+});
 ---
 
-<Module tkn={key.module}/>::{
-    parentItem && <><a class={parentItem.kind} href={getItemHref(parentItem)}>{parentItem}</a>#</>
-}<a class={item.kind} href={getItemHref(item)}>{getItemDefaultAlias(item)}</a>
+<Module tkn={module}/>{pathItems.map(({ kind, href, part }) => <>::<a class={kind} href={href}>{part}</a></>)}

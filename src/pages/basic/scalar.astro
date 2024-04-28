@@ -6,21 +6,21 @@ import Method from '../../components/Method.astro';
 import Field from '../../components/Field.astro';
 ---
 
-<TypePage key={{ term: "scalar", module: "basic" }}>
+<TypePage path={["basic", "scalar"]}>
     <Fragment slot="notation">
         <Katex tex="x"/>
     </Fragment>
 
     <Fragment slot="description">
-        A <Ref key={{ term: "scalar", module: "basic" }}/> is a singular count or value.
+        A <Ref path={['basic', 'scalar']}/> is a singular count or value.
     </Fragment>
 
     <Fragment slot="fields">
-        <Field key={{ term: "scalar", module: "basic" }} ty="null", symbol="x">
-        </Field>
+        <Field path={['basic', 'scalar']} ty={['basic', 'scalar']} symbol="x"/>
     </Fragment>
 
     <Fragment slot="methods">
-        <Method key={{ term: "scalar", module: "basic" }}></Method>
+        <Method path={["basic", "scalar", "exponent"]}>
+        </Method>
     </Fragment>
 </TypePage>

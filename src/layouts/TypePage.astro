@@ -1,24 +1,24 @@
 ---
+import Ref from '../components/Ref.astro';
 import ScopeBlock from '../components/ScopeBlock.astro';
 import Comment from '../components/syntax/Comment.astro';
 import Keyword from '../components/syntax/Keyword.astro';
-import Type from '../components/syntax/Type.astro';
 import Todo from '../components/Todo.astro';
-import { type GlossaryItem, type RefKey, findReference, generateAutoAliases } from '../scripts/glossary';
+import { type GlossaryItem, type ItemPath, generateAutoAliases, getGlossaryItem } from '../scripts/glossary';
 import ModulePage from './ModulePage.astro';
 
 interface Props {
-    key: RefKey;
+    path: ItemPath;
 }
 
-const { key } = Astro.props;
+const { path } = Astro.props;
 
 /** Data about the item we are referencing */
-const item: GlossaryItem = findReference(key);
+const item: GlossaryItem = getGlossaryItem(path);
 ---
 
-<ModulePage title={`${key.term} type`} module={key.module}>
-    <h1><Keyword tkn="type"/> <Type tkn={key.term}/></h1>
+<ModulePage title={`${path.at(-1)} type`} module={path[0]}>
+    <h1><Keyword tkn="type"/> <Ref path={path} mustBe="type"/></h1>
 
     <ScopeBlock>
         <h2 id="aliases"><Comment>Aliases</Comment></h2>

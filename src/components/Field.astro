@@ -1,26 +1,24 @@
 ---
+import { isValidKeyword, type ValidKeyword } from "../scripts/syntax";
+import { type ItemPath } from '../scripts/glossary';
 import Ref from "./Ref.astro";
 import Keyword from "./syntax/Keyword.astro";
-import { isValidKeyword, type ValidKeyword } from "../scripts/syntax";
-import { isReference, type RefKey } from '../scripts/glossary';
 import Comment from "./syntax/Comment.astro";
 import Katex from "./Katex.astro";
 
 interface Props {
-    key: RefKey;
-    ty: RefKey | ValidKeyword;
+    path: ItemPath;
+    ty: ItemPath | ValidKeyword;
     symbol: string;
 }
 
-const { key, ty, symbol } = Astro.props;
+const { path, ty, symbol } = Astro.props;
 ---
 
-<Ref key={key}/>: {() => {
+<Ref path={path}/>: {() => {
     if (isValidKeyword(ty)) {
         return <Keyword tkn={ty}/>;
-    } else if (isReference(ty)) {
-        return <Ref key={ty}/>;
     } else {
-        throw new Error(`Unknown type "${ty}" on field "${key}" is neither a glossary item nor a keyword`);
+        return <Ref path={ty}/>;
     }
 }}; <Comment>Symbol in <a href="#notation">notation</a>: <Katex tex={symbol}></Comment>

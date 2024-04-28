@@ -43,20 +43,20 @@ interface Alias {
 }
 
 export const generateAutoAliases = (alias: Alias): Alias => {
-    const result: Alias = {};
+    const aliases: Alias = {};
 
     const { noun, verb, adjective } = alias;
 
     if (noun) {
         const { singular, plural } = noun;
-        result.noun = { singular: singular, plural: plural ?? singular + 's' };
+        aliases.noun = { singular: singular, plural: plural ?? singular + 's' };
     }
 
     if (verb) {
         const { infinitive, past, present, continuous, future } = verb;
         const infinitiveEndWithE = infinitive.endsWith('e') ? infinitive : infinitive + 'e';
         const infinitiveWithoutY = infinitive.endsWith('y') ? infinitive.slice(0, -1) : infinitive;
-        result.verb = {
+        aliases.verb = {
             infinitive: infinitive,
             past: past ?? infinitiveEndWithE + 'd',
             present: present ?? infinitive + 's',
@@ -68,7 +68,7 @@ export const generateAutoAliases = (alias: Alias): Alias => {
     if (adjective) {
         const { base, comparative, superlative, noun } = adjective;
         const baseIForY = base.endsWith('y') ? base.slice(0, -1) + 'i' : base;
-        result.adjective = {
+        aliases.adjective = {
             base: base,
             comparative: comparative ?? comparative === null ? 'more ' + base : baseIForY + 'er',
             superlative: superlative ?? superlative === null ? 'most ' + base : baseIForY + 'est',
@@ -76,127 +76,139 @@ export const generateAutoAliases = (alias: Alias): Alias => {
         };
     }
 
-    return result;
+    return aliases;
 };
 
-const isMatchingAlias = (alias: Alias, word: string): boolean => {
-    const options = [];
+// const isMatchingAlias = (alias: Alias, word: string): boolean => {
+//     const options = [];
+//
+//     const { noun, verb, adjective } = generateAutoAliases(alias);
+//
+//     noun && options.push(noun.singular, noun.plural);
+//
+//     verb && options.push(verb.infinitive, verb.past, verb.present, verb.continuous, verb.future);
+//
+//     adjective && options.push(adjective.base, adjective.comparative, adjective.superlative, adjective.noun);
+//
+//     // console.log(options); // For debugging
+//
+//     return options.includes(word);
+// };
 
-    const { noun, verb, adjective } = generateAutoAliases(alias);
-
-    noun && options.push(noun.singular, noun.plural);
-
-    verb && options.push(verb.infinitive, verb.past, verb.present, verb.continuous, verb.future);
-
-    adjective && options.push(adjective.base, adjective.comparative, adjective.superlative, adjective.noun);
-
-    // console.log(options); // For debugging
-
-    return options.includes(word);
-};
+export type Kind = 'function' | 'type' | 'field';
 
 export interface GlossaryItem {
-    /** The type the item is a field or method of (leave undefined if the item is a type) */
-    propertyOf?: string;
-
     /** Affects reference highlighting */
-    kind: string;
+    kind: Kind;
 
     /** First item will be used as displayname */
     aliases: Alias[];
 
     /** Shown on the tooltip */
     brief: string;
+
+    /** Children of the item */
+    properties?: { [key: string]: GlossaryItem };
 }
 
-export const glossaryItemToString = (item: GlossaryItem): string => {
-    const { kind, brief, propertyOf } = item;
-    const name = getItemDefaultAlias(item);
-    const propertyOfPreamble = propertyOf ? ` within ${propertyOf}` : '';
-    return `{ ${kind}${propertyOfPreamble}: ${name} - ${brief} }`;
-};
-
-export const getItemDefaultAlias = (item: GlossaryItem): string => {
-    const { noun, verb, adjective } = item.aliases[0];
-    return (
-        noun?.singular ??
-        verb?.infinitive ??
-        adjective?.base ??
-        (() => {
-            throw new Error(`The first alias of the glossary item ${glossaryItemToString(item)} has no noun, verb, nor adjective form.`);
-        })()
-    );
-};
-
-import glossaryData from '../../public/glossary.json';
-export const glossary: { [module: string]: { [name: string]: GlossaryItem } } = glossaryData;
-export const modules: string[] = Object.keys(glossary);
-
-export interface RefKey {
-    /** The module the reference belongs to */
-    module: string;
-
-    /** The type the reference is a field or method of (leave undefined if the reference is a type) */
-    propertyOf?: string;
-
-    /** Any alias of the reference */
-    term: string;
+export interface GlossaryModule {
+    [item: string]: GlossaryItem;
 }
 
-const getRefString = (key: RefKey): string => {
-    return key.propertyOf ? `${key.module}::${key.propertyOf}#${key.term}` : `${key.module}::${key.term}`;
+export type Glossary = { [module: string]: GlossaryModule };
+
+export const glossary: Glossary = {
+    basic: {
+        scalar: {
+            kind: 'type',
+            aliases: [
+                { noun: { singular: 'scalar' }, adjective: { base: 'scalar', comparative: null, superlative: null } },
+                { noun: { singular: 'number' }, verb: { infinitive: 'number' } },
+                { adjective: { base: 'numeric', comparative: null, superlative: null } },
+            ],
+            brief: 'A singular count or mathematical value. Can be a fraction.',
+            properties: {
+                exponent: {
+                    kind: 'function',
+                    aliases: [{ noun: { singular: 'exponent' } }, { noun: { singular: 'power' } }],
+                    brief: 'Multiply the base by itself [power] times.',
+                    properties: {
+                        base: {
+                            kind: 'field',
+                            aliases: [{ noun: { singular: 'exponent' } }, { noun: { singular: 'power' } }],
+                            brief: 'Multiply the base by itself [power] times.',
+                        },
+                        power: {
+                            kind: 'field',
+                            aliases: [{ noun: { singular: 'exponent' } }, { noun: { singular: 'power' } }],
+                            brief: 'Multiply the base by itself [power] times.',
+                        },
+                    },
+                },
+                addition: {
+                    kind: 'function',
+                    aliases: [{ noun: { singular: 'exponent' } }, { noun: { singular: 'power' } }],
+                    brief: 'Multiply the base by itself [power] times.',
+                },
+                subtraction: {
+                    kind: 'function',
+                    aliases: [{ noun: { singular: 'exponent' } }, { noun: { singular: 'power' } }],
+                    brief: 'Multiply the base by itself [power] times.',
+                },
+                multiplication: {
+                    kind: 'function',
+                    aliases: [{ noun: { singular: 'exponent' } }, { noun: { singular: 'power' } }],
+                    brief: 'Multiply the base by itself [power] times.',
+                },
+                division: {
+                    kind: 'function',
+                    aliases: [{ noun: { singular: 'exponent' } }, { noun: { singular: 'power' } }],
+                    brief: 'Multiply the base by itself [power] times.',
+                },
+            },
+        },
+        exponent: {
+            kind: 'function',
+            aliases: [{ noun: { singular: 'exponent' } }, { noun: { singular: 'power' } }],
+            brief: 'Multiply the base by itself [power] times.',
+        },
+    },
 };
 
-export type ItemPath = [string, string | undefined, string];
+export type ItemPath = [string, ...string[], string];
 
-export const getItemPath = (item: GlossaryItem): ItemPath => {
-    for (const module in glossary) {
-        for (const term in glossary[module]) {
-            if (glossary[module][term] === item) {
-                return [module, item.propertyOf, term];
+export const itemPathToHref = (path: ItemPath): string => '/' + path.join('/');
+
+export const getGlossaryItem = (path: ItemPath): GlossaryItem => {
+    console.log(path.join('/'));
+
+    const moduleName = path[0];
+    const module: GlossaryModule | undefined = glossary[moduleName];
+    if (module === undefined) {
+        throw new Error(`'${moduleName}' is not a valid module name.`);
+    }
+
+    const rootName = path[1];
+    const root: GlossaryItem | undefined = module[rootName];
+    if (root === undefined) {
+        throw new Error(`'${rootName}' is not a valid item in the module ${moduleName}.`);
+    }
+    let current: GlossaryItem = root;
+
+    path.slice(2).forEach((part, index) => {
+        index += 2; // Account for slice
+        const subPath = path.slice(0, index).join('/');
+        if (current.properties !== undefined) {
+            const property = current.properties[part];
+            if (property !== undefined) {
+                current = property;
+            } else {
+                throw new Error(`${part} is not a property of "${subPath}". The valid properties are: [${Object.keys(current.properties).join(', ')}]`);
             }
+        } else {
+            throw new Error(`"${subPath}" has no properties (looking for '${part}')`);
         }
-    }
-    throw new Error(`Could not locate the item ${glossaryItemToString(item)} in the glossary`);
-};
+    });
 
-export const itemPathToHref = (path: ItemPath): string => {
-    const [module, propertyOf, term] = path;
-    return `/${module}/` + (propertyOf ? `${propertyOf}#` : '') + term;
-};
-
-export const getItemHref = (item: GlossaryItem): string => itemPathToHref(getItemPath(item));
-
-export const itemPathToRefKey = (path: ItemPath): RefKey => {
-    const [module, propertyOf, term] = path;
-    return { module, propertyOf, term };
-};
-
-export const getItemRefKey = (item: GlossaryItem): RefKey => {
-    return itemPathToRefKey(getItemPath(item));
-};
-
-export const findReference = (key: RefKey): GlossaryItem => {
-    const { module, propertyOf, term } = key;
-    const termLower = term.toLowerCase();
-    const matches: GlossaryItem[] = Object.values(glossary[module])
-        .filter((item: GlossaryItem) => item.propertyOf === propertyOf)
-        .filter((item: GlossaryItem) => item.aliases.find((alias) => isMatchingAlias(alias, termLower)));
-
-    if (matches.length === 1) {
-        return matches[0];
-    } else if (matches.length > 1) {
-        throw new Error(`Multiple glossary entries matching "${getRefString(key)}" exist, intent ambiguous`);
-    } else {
-        throw new Error(`No glossary entry matching "${getRefString(key)}" exists`);
-    }
-};
-
-export const isReference = (key: RefKey): boolean => {
-    try {
-        findReference(key);
-        return true;
-    } catch {
-        return false;
-    }
+    return current;
 };

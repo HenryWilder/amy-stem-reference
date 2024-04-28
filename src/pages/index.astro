@@ -2,10 +2,10 @@
 import ModuleOverview from '../components/ModuleOverview.astro';
 import Comment from '../components/syntax/Comment.astro';
 import GlossaryPage from '../layouts/GlossaryPage.astro';
-import { modules } from '../scripts/glossary';
+import { glossary } from '../scripts/glossary';
 ---
 
 <GlossaryPage title='Glossary'>
 	<h1><Comment>Glossary</Comment></h1>
-	{modules.map((mod: string) => <ModuleOverview mod={mod}/>)}
+	{Object.keys(glossary).map((mod: string) => <ModuleOverview mod={mod}/>)}
 </GlossaryPage>

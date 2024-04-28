@@ -1,21 +1,32 @@
 ---
-import { type GlossaryItem, type RefKey, findReference, getItemHref } from '../scripts/glossary';
+import { type ItemPath, type GlossaryItem, type Kind, getGlossaryItem, itemPathToHref } from '../scripts/glossary';
 import RefPath from './RefPath.astro';
 
 interface Props {
-    key: RefKey;
+    /** Path to the reference */
+    path: ItemPath;
+
+    /** The text to display - defaults to the final part of `path` */
+    text?: string;
+
+    /** The kind to EXPECT the reference to have (enforcement) */
+    mustBe?: Kind;
 }
 
-const { key } = Astro.props;
+const { path, text = path.at(-1), mustBe } = Astro.props;
 
 /** Data about the item we are referencing */
-const item: GlossaryItem = findReference(key);
+const item: GlossaryItem = getGlossaryItem(path);
+
+if (mustBe !== undefined && item.kind !== mustBe) {
+    throw new Error(`Expected an item of kind '${mustBe}', ${itemPathToHref(path)} has the kind '${item.kind}'`);
+}
 ---
 
 <div class="tooltip">
-    <a href={getItemHref(item)} class={item.kind}>{key.term}</a>
+    <a href={itemPathToHref(path)} class={item.kind}>{text}</a>
     <span class="tooltiptext">
-        <RefPath key={key}/><br/><br/>
+        <RefPath path={path}/><br/><br/>
         {item.brief}
     </span>
 </div>
