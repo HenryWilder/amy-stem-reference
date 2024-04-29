@@ -8,4 +8,4 @@ interface Props {
 const { tex } = Astro.props;
 ---
 
-<Fragment set:html={katex.renderToString(tex)} />
+<Fragment set:html={katex.renderToString(tex, { trust: true })} />

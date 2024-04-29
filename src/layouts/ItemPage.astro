@@ -42,7 +42,7 @@ const functionProps: GlossaryEntry[] = properties.filter(({ item }) => item.kind
         </>}
 
         <h2 id="description"><Comment>Description</Comment></h2>
-        <ItemDescription path={path} item={item} isBrief={false}/>
+        <ItemDescription path={path} item={item} brevity="full" links="tooltip" display="block"/>
 
         {fieldProps.length !== 0 && <>
             <h2 id="fields"><Comment>Fields</Comment></h2>

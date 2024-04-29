@@ -1,7 +1,7 @@
 import { getGlossaryItem, type DescriptionLine, type Glossary, type ItemLink, type ItemPath } from './glossary';
 
 const ref = (text: string, rel: string = text.toLowerCase()): ItemLink => {
-    console.log(rel.split('::'));
+    // console.log(rel.split('::'));
     return { text, rel: rel.split('::') };
 };
 
@@ -51,6 +51,14 @@ export const relToPath = (startIn: ItemPath, rel: string[]): ItemPath => {
     throw new Error(`No path found for the rel '${rootPathToStr(rel)}' starting in '${rootPathToStr(startIn)}'`);
 };
 
+const texRef = (tex: string, href: string): string => {
+    return `{\\htmlClass{tooltip}{\\href{#${href}}{\\htmlId{notation-${href}}{${tex}}\\htmlClass{tooltiptext}{\\text{${href}}}}}}`;
+};
+
+const notationRef = (tex: string, href: string): string => {
+    return `{\\htmlClass{tooltip}{\\href{#notation-${href}}{\\htmlId{${href}}{${tex}}\\htmlClass{tooltiptext}{\\text{${href}}}}}}`;
+};
+
 export const glossary: Glossary = {
     basic: {
         scalar: {
@@ -74,7 +82,7 @@ export const glossary: Glossary = {
                             ),
                         ],
                     ],
-                    notation: 'x^y',
+                    notation: `{${texRef('\\square', 'base')}}^{${texRef('\\triangle', 'power')}}`,
                     properties: {
                         base: {
                             kind: 'field',
@@ -82,7 +90,7 @@ export const glossary: Glossary = {
                             description: [['The number being ', ref('multiplied', 'mul'), ' by itself.']],
                             fieldData: {
                                 ty: ['basic', 'scalar'],
-                                notationRef: 'x',
+                                notationRef: notationRef('\\square', 'base'),
                             },
                         },
                         power: {
@@ -91,7 +99,7 @@ export const glossary: Glossary = {
                             description: [['The number of times to ', ref('multiply', 'mul'), ' the ', ref('base'), ' by ', ref('itself', 'base')]],
                             fieldData: {
                                 ty: ['basic', 'scalar'],
-                                notationRef: 'y',
+                                notationRef: notationRef('\\triangle', 'power'),
                             },
                         },
                     },

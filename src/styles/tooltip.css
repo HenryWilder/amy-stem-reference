@@ -12,6 +12,7 @@
         border-top-left-radius: 6px;
         border-top-right-radius: 6px;
         transition: background-color 100ms 360ms;
+        z-index: 1;
 
         /* Show the tooltip text when you mouse over the tooltip container */
         .tooltiptext {
@@ -19,6 +20,16 @@
             opacity: 100%;
             transition: 100ms 360ms;
         }
+    }
+}
+
+.katex .tooltip:hover {
+    font-size: 2rem;
+    transition: font-size 100ms 360ms, background-color 100ms 360ms;
+
+    & a {
+        /* underline has special meaning in math */
+        text-decoration: none;
     }
 }
 
@@ -31,6 +42,7 @@ a.here-ref {
 .tooltip .tooltiptext {
     font-size: 16px;
     font-weight: normal;
+    font-family: serif;
     opacity: 0;
     visibility: hidden;
     width: max-content;
@@ -39,12 +51,13 @@ a.here-ref {
     border-radius: 6px;
     border-top-left-radius: 0;
     box-shadow: 0 10px 10px rgba(0, 0, 0, 0.25);
+    color: white;
 
     /* Position the tooltip text - see examples below! */
     position: absolute;
     top: 100%;
     left: 0;
-    z-index: 1;
+    z-index: 2;
 
     p:last-child {
         margin-bottom: 0;
