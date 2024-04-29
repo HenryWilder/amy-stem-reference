@@ -51,12 +51,38 @@ export const relToPath = (startIn: ItemPath, rel: string[]): ItemPath => {
     throw new Error(`No path found for the rel '${rootPathToStr(rel)}' starting in '${rootPathToStr(startIn)}'`);
 };
 
-const texRef = (tex: string, href: string): string => {
-    return `{\\htmlClass{tooltip}{\\href{#${href}}{\\htmlId{notation-${href}}{${tex}}\\htmlClass{tooltiptext}{\\text{${href}}}}}}`;
+const texRef = (tex: string, id: string, variance: 'const' | 'var', standardization: string[] | 'non-std'): string => {
+    const varianceStr = (() => {
+        switch (variance) {
+            case 'const':
+                return 'constant';
+            case 'var':
+                return 'not a constant';
+        }
+    })();
+
+    const standardizationStr = (() => {
+        if (standardization === 'non-std') {
+            return 'non-standard symbol';
+        } else {
+            return `standard symbols: \\( \\begin{matrix} ${standardization.join(' & ')} \\end{matrix} \\)`;
+        }
+    })();
+
+    return `{
+           \\htmlClass{tooltip}{
+               \\href{#${id}}{
+               \\htmlId{notation-${id}}{${tex}}
+                   \\htmlClass{tooltiptext}{
+                       \\text{${id} --- ${varianceStr} --- ${standardizationStr}}
+                   }
+               }
+           }
+        }`;
 };
 
-const notationRef = (tex: string, href: string): string => {
-    return `{\\htmlClass{tooltip}{\\href{#notation-${href}}{\\htmlId{${href}}{${tex}}\\htmlClass{tooltiptext}{\\text{${href}}}}}}`;
+const notationRef = (tex: string, id: string): string => {
+    return `{\\href{#notation-${id}}{${tex}}}`;
 };
 
 export const glossary: Glossary = {
@@ -73,16 +99,16 @@ export const glossary: Glossary = {
                         [ref('Multiply', 'mul'), ' the ', ref('base'), ' by ', ref('itself', 'base'), ' ', ref('power'), '-times.'],
                         [
                             tex(
-                                '\\def\\xn#1{\\overset{\\tiny#1}{x}}' +
-                                    'x^1 = \\xn1 \\\\' +
-                                    'x^2 = \\xn1 \\times \\xn2 \\\\' +
-                                    'x^3 = \\xn1 \\times \\xn2 \\times \\xn3 \\\\' +
-                                    '\\vdots \\\\' +
-                                    'x^n = \\xn1 \\times \\xn2 \\times \\ldots \\times \\xn{n}'
+                                `\\def\\xn#1{\\overset{\\tiny#1}{x}}
+                                x^1 = \\xn1 \\\\
+                                x^2 = \\xn1 \\times \\xn2 \\\\
+                                x^3 = \\xn1 \\times \\xn2 \\times \\xn3 \\\\
+                                \\vdots \\\\
+                                x^n = \\xn1 \\times \\xn2 \\times \\ldots \\times \\xn{n}`
                             ),
                         ],
                     ],
-                    notation: `{${texRef('\\square', 'base')}}^{${texRef('\\triangle', 'power')}}`,
+                    notation: `{${texRef('\\square', 'base', 'var', 'non-std')}}^{${texRef('\\triangle', 'power', 'var', 'non-std')}}`,
                     properties: {
                         base: {
                             kind: 'field',

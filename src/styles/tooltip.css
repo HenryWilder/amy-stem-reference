@@ -24,7 +24,7 @@
 }
 
 .katex .tooltip:hover {
-    font-size: 2rem;
+    /* font-size: 2rem; */
     transition: font-size 100ms 360ms, background-color 100ms 360ms;
 
     & a {
@@ -42,7 +42,7 @@ a.here-ref {
 .tooltip .tooltiptext {
     font-size: 16px;
     font-weight: normal;
-    font-family: serif;
+    /* font-family: serif; */
     opacity: 0;
     visibility: hidden;
     width: max-content;
