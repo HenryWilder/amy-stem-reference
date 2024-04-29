@@ -1,0 +1,54 @@
+---
+import Katex from "./Katex.astro";
+import '../styles/animated-tex.css';
+
+interface Props {
+    tex: string[];
+}
+
+const { tex } = Astro.props;
+
+const anim = (...data: string[]): string => {
+    return `{\\htmlClass{anim-box}{` +
+        data.map((str, index) => `\\htmlClass{anim-element ${index === 0 ? 'visible' : ''}}{${str}}`).join('') +
+        '}}';
+}
+
+// todo: grab this from input
+const animatedTex = `{\\color{deepskyblue}{f}}({\\color{lightgreen}{${anim('x', 'y', 'z')}}}) = 2{\\color{tomato}{${anim('x', 'y', 'z', 'w')}}}`;
+---
+
+<Katex tex={animatedTex}/><br/>
+
+<script>
+    interface AnimBoxElements { animBox: HTMLElement; animElements: HTMLElement[]; increment: 1 | -1; currentTick: number }
+    const animBoxElements: AnimBoxElements[] = Array.from(document.getElementsByClassName('anim-box'))
+        .map((animBox) => ({
+            animBox: animBox as HTMLElement,
+            animElements: Array.from(animBox.querySelectorAll('.anim-element')).map(x => x as HTMLElement),
+            increment: 1,
+            currentTick: 0
+        }));
+
+    console.debug(animBoxElements);
+
+    setInterval(() => {
+        animBoxElements.forEach((data) => {
+            if (data.increment === -1 && data.currentTick === 0) {
+                data.increment = 1;
+            } else if (data.increment === 1 && data.currentTick === data.animElements.length - 1) {
+                data.increment = -1;
+            }
+            const newTick = data.currentTick + data.increment;
+            const bound = data.animBox.children.length;
+            if (data.currentTick < bound && newTick < bound) {
+                const [oldElement, newElement] = [data.animElements[data.currentTick], data.animElements[newTick]];
+                oldElement.classList.remove('visible');
+                oldElement.style.maxWidth = '0px';
+                newElement.classList.add('visible');
+                newElement.style.maxWidth = newElement.scrollWidth + 2 + 'px';
+            }
+            data.currentTick = newTick;
+        });
+    }, 2000);
+</script>

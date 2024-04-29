@@ -1,6 +1,5 @@
 html, body {
-    /* Important so that KaTeX doesn't override it */
-    background-color: var(--background-main) !important;
+    background-color: var(--background-main);
     color: white;
     box-sizing: border-box;
     padding: 1rem;
