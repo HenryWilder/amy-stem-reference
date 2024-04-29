@@ -1,0 +1,20 @@
+---
+interface Props {
+    /** Path to the reference */
+    item: any;
+}
+
+const { item } = Astro.props;
+
+console.log(item)
+const href = /src\/content\/(.*)\.mdx/.exec(item.url)![1];
+console.log(href)
+---
+
+<div class="tooltip">
+    <a href={href} class={item.kind}><slot></slot></a>
+    <span class="tooltiptext">
+        hello world<br/><br/>
+        {item.frontmatter.brief}
+    </span>
+</div>

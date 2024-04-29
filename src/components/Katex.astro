@@ -1,5 +1,6 @@
 ---
 import katex from 'katex';
+import '../styles/animated-tex.css';
 
 interface Props {
     tex: string;
@@ -9,3 +10,5 @@ const { tex } = Astro.props;
 ---
 
 <Fragment set:html={katex.renderToString(tex, { trust: true })} />
+
+<script src="../../public/client-animated-tex.ts"></script>

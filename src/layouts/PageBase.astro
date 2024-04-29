@@ -24,6 +24,6 @@ import '../styles/tooltip.css';
 	</head>
 	<body>
         <slot></slot>
-        {Astro.url.href !== Astro.url.origin ? <a href="/" style="color: rgba(255,255,255,0.25)">glossary</a> : <></>}
+        {Astro.url.href !== Astro.url.origin ? <a href="/" style="color: rgba(255,255,255,0.25);display:block;">glossary</a> : <></>}
 	</body>
 </html>

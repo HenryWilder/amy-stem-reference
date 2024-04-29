@@ -1,0 +1,13 @@
+---
+import type { ItemPath } from "../scripts/glossary";
+import ModulePage from "./ModulePage.astro";
+
+const { frontmatter, Content, methods } = Astro.props;
+
+const path: ItemPath = ['basic', 'scalar'];
+---
+
+<ModulePage path={path}>
+    <p>{frontmatter.brief}</p>
+    <slot></slot>
+</ModulePage>
