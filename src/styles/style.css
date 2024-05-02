@@ -79,17 +79,12 @@ ul.alias-list {
 table.alias-list {
     border-collapse: collapse;
 
-    td:nth-child(2) {
+    td {
         padding-left: 1ch;
 
-        &::before {
-            content: '= ';
-            color: lightgray;
-        }
+        &:first-child {
+            padding-left: 0;
 
-        &::after {
-            content: ';';
-            color: lightgray;
         }
     }
 }
@@ -112,12 +107,10 @@ table.parameter-list {
             padding-left: 1ch;
 
             &::before {
-                content: ': ';
                 color: lightgray;
             }
 
             &::after {
-                content: ',';
                 color: lightgray;
             }
         }

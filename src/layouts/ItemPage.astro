@@ -13,7 +13,7 @@ import Field from '../components/Field.astro';
 import Method from '../components/Method.astro';
 import Alias from '../components/Alias.astro';
 import ScopeInline from '../components/ScopeInline.astro';
-import type { GlossaryEntry } from '../scripts/glossary';
+import type { GlossaryEntry, Kind } from '../scripts/glossary';
 import { getEntries } from 'astro:content';
 import Todo from '../components/Todo.astro';
 import RefPath from '../components/RefPath.astro';
@@ -34,12 +34,20 @@ const parameters: { param: GlossaryEntry, typeOptions: GlossaryEntry[] }[] | und
         return { param, typeOptions };
     }
 ));
+
+const members = item.data.members;
 ---
 
 <ModulePage title={slug.split('/').at(-1)!} item={item}>
     {item.data.aliases && <h2 id="aliases"><Comment>Aliases</Comment></h2>
     <table class="alias-list">
-        {item.data.aliases?.map((alias: string) => <Alias of={item}>{alias}</Alias>)}
+        {Object.entries(item.data.aliases).map(([alias, kind]) =>
+            <tr>
+                <td><Keyword tkn={kind}/></td>
+                <td><Ref item={item}>{alias}</Ref></td>
+                <td>{kind === item.data.kind ? '=' : '~'}&nbsp;<Ref item={item}/></td>
+            </tr>
+        )}
     </table>}
 
     <h1><Keyword tkn={item.data.kind}/> <Ref item={item}/></h1>
@@ -63,31 +71,31 @@ const parameters: { param: GlossaryEntry, typeOptions: GlossaryEntry[] }[] | und
             </ul>
         </>}
 
-        {item.data.members && <>
+        {members && members.types.length + members.fields.length + members.methods.length !== 0 && <>
             <h2><Comment>Members</Comment></h2>
 
-            {item.data.members.types.length !== 0 && <>
+            {members.types.length !== 0 && <>
                 <h3 id="types"><Comment>Types</Comment></h3>
-                {item.data.members.types.map(async (ref) => {
+                {members.types.map(async (ref) => {
                     const type = await getEntry(ref);
                     return <ItemOverview item={type}/>
                 })}
             </>}
 
-            {item.data.members.fields.length !== 0 && <>
+            {members.fields.length !== 0 && <>
                 <h3 id="fields"><Comment>Fields</Comment></h3>
                 <ScopeBlock>
-                    {item.data.members.fields.map(async (ref) => {
+                    {members.fields.map(async (ref) => {
                         const field = await getEntry(ref);
                         return <Field item={field} itemType={field.data.type} symbol={''}/>
                     })}
                 </ScopeBlock>
             </>}
 
-            {item.data.members.methods.length !== 0 && <>
+            {members.methods.length !== 0 && <>
                 <h3 id="methods"><Comment>Methods</Comment></h3>
                 <ScopeBlock>
-                    {item.data.members.methods.map(async (ref) => {
+                    {members.methods.map(async (ref) => {
                         const method = await getEntry(ref);
                         return <Method item={method}/>;
                     })}

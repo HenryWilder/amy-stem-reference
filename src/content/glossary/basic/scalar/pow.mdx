@@ -3,12 +3,15 @@ layout: /./src/layouts/ItemPage.astro
 slug: basic/scalar/pow
 kind: function
 aliases:
-- power
-- exponent
+  power: function
+  exponent: function
 notation: x^y
 parameters:
 - basic/scalar/pow/base
 - basic/scalar/pow/exponent
+returns:
+  result:
+  - basic/scalar
 ---
 import Ref from '/./src/components/MdxRef.astro';
 

@@ -23,9 +23,15 @@ if (item.data.kind !== 'function' || item.data.parameters === undefined) {
 // console.log(item.data.parameters);
 
 const parameters = await Promise.all(item.data.parameters!.map(async (ref) => {
-    const param: GlossaryEntry = await getEntry(ref);
-    const typeOptions: GlossaryEntry[] = await getEntries(param.data.type!);
+    const param = await getEntry(ref);
+    const typeOptions = await getEntries(param.data.type!);
     return  { param, typeOptions };
+}));
+
+const returns = await Promise.all(Object.entries(item.data.returns!).map(async ([ret, types]) => {
+    // const ret = ret;
+    const typeOptions = await getEntries(types);
+    return { ret, typeOptions };
 }));
 ---
 
@@ -36,11 +42,24 @@ const parameters = await Promise.all(item.data.parameters!.map(async (ref) => {
         {parameters.map(({ param, typeOptions }) => {
             return <tr>
                 <td><Ref item={param}/></td>
-                <td><RefPath item={typeOptions[0]}/>{typeOptions.slice(1).map((type) => <RefPath item={type}/>)}</td>
+                <td>: <Ref item={typeOptions[0]}/>{typeOptions.slice(1).map((type) => <Ref item={type}/>)},</td>
             </tr>
         })}
     </table>
-</ScopeInline> <Keyword tkn="->"/> <Todo/>
+</ScopeInline> <Keyword tkn="->"/> {
+    (returns.length === 1 && returns[0].ret === 'result')
+        ? returns.map(({ ret, typeOptions }) => {
+                return <><Ref item={typeOptions[0]}/>{typeOptions.slice(1).map((type) => <Ref item={type}/>)}</>
+            })
+        : <ScopeInline delim="{}"><table class="parameter-list">
+            {returns.map(({ ret, typeOptions }) => {
+                return <tr>
+                    <td style={ret === 'result' ? 'color:gray' : undefined}>{ret}</td>
+                    <td>: <Ref item={typeOptions[0]}/>{typeOptions.slice(1).map((type) => <Ref item={type}/>)},</td>
+                </tr>
+            })}
+        </table></ScopeInline>
+}
 <ScopeBlock>
     <Todo/>
 </ScopeBlock>

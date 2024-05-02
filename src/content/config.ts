@@ -6,7 +6,7 @@ const glossaryCollection = defineCollection({
     schema: z
         .object({
             kind: z.enum(kinds),
-            aliases: z.array(z.string()).optional(),
+            aliases: z.record(z.string(), z.enum(kinds)).optional(),
             notation: z.string().optional(),
 
             // for kind === 'field'
@@ -14,6 +14,7 @@ const glossaryCollection = defineCollection({
 
             // for kind === 'function'
             parameters: z.array(reference('glossary')).optional(),
+            returns: z.record(z.string(), z.array(reference('glossary'))).optional(),
 
             // for kind === 'type'
             members: z
@@ -53,12 +54,26 @@ const glossaryCollection = defineCollection({
                         path: ['kind', 'parameters'],
                     });
                 }
+                if (val.returns === undefined) {
+                    ctx.addIssue({
+                        code: z.ZodIssueCode.custom,
+                        message: 'function must have returns',
+                        path: ['kind', 'returns'],
+                    });
+                }
             } else {
                 if (val.parameters !== undefined) {
                     ctx.addIssue({
                         code: z.ZodIssueCode.custom,
                         message: 'only function can have parameters',
                         path: ['kind', 'parameters'],
+                    });
+                }
+                if (val.returns !== undefined) {
+                    ctx.addIssue({
+                        code: z.ZodIssueCode.custom,
+                        message: 'only function can have returns',
+                        path: ['kind', 'returns'],
                     });
                 }
             }
