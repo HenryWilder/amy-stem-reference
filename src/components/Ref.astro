@@ -1,20 +1,23 @@
 ---
-import { type GlossaryEntry } from '../scripts/glossary';
+import { type GlossaryEntry, type Kind } from '../scripts/glossary';
 import LilRef from './LilRef.astro';
 import RefPath from './RefPath.astro';
+import Tooltip from './Tooltip.astro';
 
 export interface Props {
     item: GlossaryEntry;
+    overrideKind?: Kind;
 }
 
-const { item } = Astro.props;
+const { item, overrideKind = item.data.kind } = Astro.props;
 if (item === undefined) throw new Error(`Cannot reference undefined`);
+const defaultName = item.slug.split('/').at(-1);
 ---
 
-<div class="tooltip">
-    <LilRef item={item}><slot>{item.slug.split('/').at(-1)}</slot></LilRef>
-    <span class="tooltiptext">
+<Tooltip>
+    <LilRef item={item} overrideKind={overrideKind}><slot>{defaultName}</slot></LilRef>
+    <Fragment slot="content">
         <RefPath item={item}/>
-        <p></p>
-    </span>
-</div>
+        <p>{item.data.brief}</p>
+    </Fragment>
+</Tooltip>

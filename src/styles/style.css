@@ -21,8 +21,12 @@ a {
 }
 
 .keyword {
-    color: dodgerblue;
     cursor: default;
+    color: dodgerblue;
+
+    &.control {
+        color: violet;
+    }
 }
 
 .type {
@@ -58,7 +62,13 @@ h3 {
     }
 }
 
+/* todo colorize notation for literal vs variable with button to switch */
+
 .field {
+    color: lightsteelblue;
+}
+
+.parameter {
     color: lightskyblue;
 }
 
@@ -67,51 +77,51 @@ h3 {
 }
 
 .punctuation {
-    color: lightgray;
+    color: #bbb;
+    cursor: default;
 }
 
-ul.alias-list {
-    list-style-type: none;
-    padding-left: 0;
-    margin-left: 0;
-}
+.alias-list {
+    &ul {
+        list-style-type: none;
+        padding-left: 0;
+        margin-left: 0;
+    }
 
-table.alias-list {
-    border-collapse: collapse;
+    &table {
+        border-collapse: collapse;
 
-    td {
-        padding-left: 1ch;
-
-        &:first-child {
-            padding-left: 0;
-
+        td {
+            padding: 0;
         }
     }
 }
 
-ul.parameter-list {
-    list-style-type: none;
-    padding-left: 0;
-    margin-left: 0;
-}
+.parameter-list {
+    &ul {
+        list-style-type: none;
+        padding-left: 0;
+        margin-left: 0;
+    }
 
-table.parameter-list {
-    border-collapse: collapse;
+    table {
+        border-collapse: collapse;
 
-    td {
-        &:nth-child(1) {
-            padding-left: var(--indent-size);
-        }
-
-        &:nth-child(2) {
-            padding-left: 1ch;
-
-            &::before {
-                color: lightgray;
+        td {
+            &:nth-child(1) {
+                padding-left: var(--indent-size);
             }
 
-            &::after {
-                color: lightgray;
+            &:nth-child(2) {
+                padding-left: 1ch;
+
+                &::before {
+                    color: lightgray;
+                }
+
+                &::after {
+                    color: lightgray;
+                }
             }
         }
     }
@@ -217,12 +227,4 @@ table.parameter-list {
     li:not(:last-child) {
         margin-bottom: 1em;
     }
-}
-
-.no-mouse, .no-touchy {
-    pointer-events: none;
-}
-
-.no-select, .no-touchy {
-    user-select: none;
 }

@@ -1,0 +1,10 @@
+---
+import '../styles/tooltip.css';
+---
+
+<div class="tooltip">
+    <slot/>
+    <span class="tooltiptext">
+        <slot name="content"/>
+    </span>
+</div>

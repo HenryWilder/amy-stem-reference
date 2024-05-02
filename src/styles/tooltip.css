@@ -6,17 +6,17 @@
     display: inline-block;
 
     &:hover {
-        background-color: var(--background-tooltip);
-        margin: -0.5rem -0.5rem;
-        padding: 0.5rem 0.5rem;
-        border-top-left-radius: 6px;
-        border-top-right-radius: 6px;
+        background-color: color-mix(in srgb, skyblue 15%, transparent);
+        margin: -2px -0;
+        padding: 2px 0;
+        /* border-top-left-radius: 6px;
+        border-top-right-radius: 6px; */
         transition: background-color 100ms 360ms;
         z-index: 1;
 
         /* Show the tooltip text when you mouse over the tooltip container */
         .tooltiptext {
-            visibility: visible;
+            display: inline;
             opacity: 100%;
             transition: 100ms 360ms;
         }
@@ -33,53 +33,32 @@
     }
 }
 
-a.here-ref {
-    text-decoration: none;
-    font-weight: bold;
-}
-
 /* Tooltip text */
-.tooltip .tooltiptext {
+.tooltip > .tooltiptext {
     font-size: 16px;
     font-weight: normal;
     /* font-family: serif; */
     opacity: 0;
-    visibility: hidden;
+    display: none;
     width: max-content;
-    background-color: var(--background-tooltip);
-    padding: 0.75rem;
-    border-radius: 6px;
-    border-top-left-radius: 0;
-    box-shadow: 0 10px 10px rgba(0, 0, 0, 0.25);
+    background-color: var(--background-main);
+    border: 1px solid #3a3a3a;
+    border-radius: 4px;
+    /* border-top-left-radius: 0; */
+    box-shadow: 0 3px 3px rgba(0, 0, 0, 0.25);
     color: white;
-
+    padding: 0.5em 0.7em;
     /* Position the tooltip text - see examples below! */
     position: absolute;
     top: 100%;
     left: 0;
     z-index: 2;
 
+    p:first-child {
+        margin-top: 0;
+    }
+
     p:last-child {
         margin-bottom: 0;
-    }
-}
-
-.part-of-speech {
-    user-select: none;
-    background-color: rgba(0, 0, 0, 0.35);
-    padding: 1px 0.5ch;
-    border-radius: 3px;
-    font-size: small;
-
-    &.noun {
-        color: dodgerblue;
-    }
-
-    &.verb {
-        color: goldenrod;
-    }
-
-    &.adjective {
-        color: lightskyblue;
     }
 }

@@ -2,17 +2,23 @@
 import Ref from "./Ref.astro";
 import Comment from "./syntax/Comment.astro";
 import Katex from "./Katex.astro";
-import ItemDescription from './ItemDescription.astro';
+import Punc from "./syntax/Punc.astro";
+import type { GlossaryEntry } from "../scripts/glossary";
+import { getEntries } from "astro:content";
+import TypeUnion from "./TypeUnion.astro";
 
 interface Props {
-    item: any; // todo
-    itemType: any; // todo
+    item: GlossaryEntry;
     symbol: string;
 }
 
-const { item, itemType, symbol } = Astro.props;
+const { item, symbol } = Astro.props;
+
+if (item.data.kind !== 'field' && item.data.kind !== 'parameter') {
+    throw new Error(`Expected a field or parameter; '${item.slug}' is not a field or parameter`);
+}
 ---
 
 <h3><Comment><Katex tex={symbol}></Comment> in <a href="#notation">notation</a></h3>
-<!-- <Comment><ItemDescription path={path} brevity="brief" display="inline" links="tooltip"/></Comment><br/> -->
-<Ref item={item}/>: <Ref item={itemType}/>
+<Comment>{item.data.brief}</Comment><br/>
+<Ref item={item}/><Punc ch=":"/> <TypeUnion list={item.data.typeUnion!}/><Punc ch=";"/>

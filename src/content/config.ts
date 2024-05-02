@@ -5,42 +5,45 @@ const glossaryCollection = defineCollection({
     type: 'content',
     schema: z
         .object({
+            brief: z.string().describe('This appears on the tooltip'),
             kind: z.enum(kinds),
             aliases: z.record(z.string(), z.enum(kinds)).optional(),
             notation: z.string().optional(),
 
             // for kind === 'field'
-            type: z.array(reference('glossary')).optional(),
+            typeUnion: z.array(reference('glossary')).optional(),
 
             // for kind === 'function'
             parameters: z.array(reference('glossary')).optional(),
             returns: z.record(z.string(), z.array(reference('glossary'))).optional(),
 
             // for kind === 'type'
+            traits: z.array(reference('glossary')).optional(),
             members: z
                 .object({
                     types: z.array(reference('glossary')),
                     fields: z.array(reference('glossary')),
                     methods: z.array(reference('glossary')),
+                    traits: z.array(reference('glossary')),
                 })
                 .optional(),
         })
         .superRefine((val, ctx) => {
-            // field
-            if (val.kind === 'field') {
-                if (val.type === undefined || val.type.length === 0) {
+            // field or parameter
+            if (val.kind === 'field' || val.kind === 'parameter') {
+                if (val.typeUnion === undefined || val.typeUnion.length === 0) {
                     ctx.addIssue({
                         code: z.ZodIssueCode.custom,
-                        message: `field must have${val.type?.length === 0 ? ' at least one' : ''} type`,
-                        path: ['kind', 'type'],
+                        message: `${val.kind} must have typeUnion`,
+                        path: ['kind', 'typeUnion'],
                     });
                 }
             } else {
-                if (val.type !== undefined) {
+                if (val.typeUnion !== undefined) {
                     ctx.addIssue({
                         code: z.ZodIssueCode.custom,
-                        message: 'only field can have type',
-                        path: ['kind', 'type'],
+                        message: `${val.kind} cannot have typeUnion`,
+                        path: ['kind', 'typeUnion'],
                     });
                 }
             }
@@ -88,6 +91,13 @@ const glossaryCollection = defineCollection({
                     });
                 }
             } else {
+                if (val.traits !== undefined) {
+                    ctx.addIssue({
+                        code: z.ZodIssueCode.custom,
+                        message: 'only type can have traits',
+                        path: ['kind', 'traits'],
+                    });
+                }
                 if (val.members !== undefined) {
                     ctx.addIssue({
                         code: z.ZodIssueCode.custom,

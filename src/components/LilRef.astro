@@ -3,9 +3,10 @@ import { type GlossaryEntry, type Kind } from '../scripts/glossary';
 
 interface Props {
     item: GlossaryEntry;
+    overrideKind?: Kind;
 }
 
-const { item } = Astro.props;
+const { item, overrideKind = item.data.kind } = Astro.props;
 ---
 
-<a href={'/' + item.slug} class={item.data.kind}><slot>{item.slug.split('/').at(-1)!}</slot></a>
+<a href={'/' + item.slug} class={overrideKind}><slot>{item.slug.split('/').at(-1)!}</slot></a>

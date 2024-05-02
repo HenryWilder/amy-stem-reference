@@ -1,20 +1,39 @@
 ---
 import { type ValidKeyword } from '../../scripts/syntax';
+import Tooltip from '../Tooltip.astro';
 
 interface Props {
     tkn: ValidKeyword;
 }
 
 const { tkn } = Astro.props;
+
+const tokenData: Record<ValidKeyword, [string, string]> = {
+    '->': ['&rightarrow;', 'becomes'],
+    '=>': ['&Implies;', 'implies'],
+    'function': ['fn', 'takes parameters and produces a result'],
+    'module': ['mod', 'an entire area of a study'],
+    'field': ['pub', 'a part of an object'],
+    'parameter': ['param', 'an input to a function'],
+    'implements': ['impl', 'the object follows the template of this trait'],
+    'extends': ['extends', 'the object builds upon the template of this type'],
+    'null': ['null', 'nothing'],
+    'static': ['static', 'external to the object possessing it'],
+    'type': ['type', 'an object\'s structure'],
+    'trait': ['trait', 'a template or guide for the basis of a type'],
+};
+
+const [symbol, description] = tokenData[tkn];
+
+const isControl = ([] as ValidKeyword[]).includes(tkn);
+const classList = ["keyword", isControl ? 'control' : undefined];
 ---
 
-<span class="keyword">{() => {
-    switch (tkn) {
-        case '->':
-            return <>&rightarrow;</>;
-        case '=>':
-            return <>&Implies;</>;
-        default:
-            return tkn;
-    }
-}}</span>
+<Tooltip>
+    <span class:list={classList} set:html={symbol}></span>
+    <Fragment slot="content">
+        <p class:list={classList}>keyword: {tkn}</p>
+        <p>{description}</p>
+    </Fragment>
+</Tooltip>
+

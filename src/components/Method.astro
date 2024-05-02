@@ -9,6 +9,8 @@ import Keyword from './syntax/Keyword.astro';
 import Todo from './Todo.astro';
 import RefPath from './RefPath.astro';
 import { getEntries } from 'astro:content';
+import Punc from './syntax/Punc.astro';
+import TypeUnion from './TypeUnion.astro';
 
 interface Props {
     item: GlossaryEntry;
@@ -24,14 +26,11 @@ if (item.data.kind !== 'function' || item.data.parameters === undefined) {
 
 const parameters = await Promise.all(item.data.parameters!.map(async (ref) => {
     const param = await getEntry(ref);
-    const typeOptions = await getEntries(param.data.type!);
-    return  { param, typeOptions };
+    return  { param, typeOptions: param.data.typeUnion! };
 }));
 
 const returns = await Promise.all(Object.entries(item.data.returns!).map(async ([ret, types]) => {
-    // const ret = ret;
-    const typeOptions = await getEntries(types);
-    return { ret, typeOptions };
+    return { ret, typeOptions: types };
 }));
 ---
 
@@ -42,20 +41,20 @@ const returns = await Promise.all(Object.entries(item.data.returns!).map(async (
         {parameters.map(({ param, typeOptions }) => {
             return <tr>
                 <td><Ref item={param}/></td>
-                <td>: <Ref item={typeOptions[0]}/>{typeOptions.slice(1).map((type) => <Ref item={type}/>)},</td>
+                <td><Punc ch=":"/> <TypeUnion list={typeOptions}/><Punc ch=","/></td>
             </tr>
         })}
     </table>
 </ScopeInline> <Keyword tkn="->"/> {
     (returns.length === 1 && returns[0].ret === 'result')
         ? returns.map(({ ret, typeOptions }) => {
-                return <><Ref item={typeOptions[0]}/>{typeOptions.slice(1).map((type) => <Ref item={type}/>)}</>
+                return <TypeUnion list={typeOptions}/>
             })
         : <ScopeInline delim="{}"><table class="parameter-list">
             {returns.map(({ ret, typeOptions }) => {
                 return <tr>
                     <td style={ret === 'result' ? 'color:gray' : undefined}>{ret}</td>
-                    <td>: <Ref item={typeOptions[0]}/>{typeOptions.slice(1).map((type) => <Ref item={type}/>)},</td>
+                    <td><Punc ch=":"/> <TypeUnion list={typeOptions}/><Punc ch=","/></td>
                 </tr>
             })}
         </table></ScopeInline>

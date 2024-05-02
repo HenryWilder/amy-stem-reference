@@ -1,17 +1,22 @@
 ---
 layout: /./src/layouts/ItemPage.astro
 slug: basic/scalar
+brief: hello world
 kind: type
 aliases:
   number: type
   numeric: trait
 notation: x
+traits:
+- basic/numeric
+- basic/numeric
 members:
   types:
   - basic/scalar/int
   fields: []
   methods:
   - basic/scalar/pow
+  traits: []
 ---
 import Ref from '/./src/components/MdxRef.astro';
 export const scalar = "basic/scalar";

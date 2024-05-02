@@ -1,32 +1,25 @@
 ---
-import Ref from "./Ref.astro";
-import ScopeBlock from "./ScopeBlock.astro";
-import { getEntries } from "astro:content";
 import type { GlossaryEntry } from "../scripts/glossary";
-import Comment from "./syntax/Comment.astro";
-import Keyword from "./syntax/Keyword.astro";
+import Method from "./Method.astro";
+import Type from "./Type.astro";
+import Field from "./Field.astro";
+import ModuleOverview from "./ModuleOverview.astro";
+import Todo from "./Todo.astro";
 
 interface Props {
     item: GlossaryEntry;
 }
 
 const { item } = Astro.props;
-
-const members: [string, GlossaryEntry[]][] | undefined = item.data.members && [
-    ['Types', await getEntries(item.data.members.types)],
-    ['Fields', await getEntries(item.data.members.fields)],
-    ['Methods', await getEntries(item.data.members.methods)]
-];
 ---
 
-<Keyword tkn={item.data.kind}/> <Ref item={item}/>
-{members && members.map(([_, x]) => x.length).reduce((p, c) => p + c) !== 0 &&
-    <ScopeBlock>
-        {members.map(([subset, members]) => members.length !== 0 && <>
-            <h3><Comment>{subset}</Comment></h3>
-            <ul class="glossary-list">
-                {members.map((member: GlossaryEntry) => <li><Astro.self item={member}/></li>)}
-            </ul>
-        </>)}
-    </ScopeBlock>
-}
+{() => {
+    switch (item.data.kind) {
+        case "function":  return <Method item={item}/>;
+        case "type": return <Type item={item}/>;
+        case "field": return <Field item={item} symbol="todo"/>;
+        case "parameter": return <Field item={item} symbol="todo"/>;
+        case "trait": return <Todo/>;
+        case "module": return <ModuleOverview module={item.slug}/>;
+    }
+}}

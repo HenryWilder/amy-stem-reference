@@ -11,13 +11,13 @@ import ScopeBlock from '../components/ScopeBlock.astro';
 import Katex from '../components/Katex.astro';
 import Field from '../components/Field.astro';
 import Method from '../components/Method.astro';
-import Alias from '../components/Alias.astro';
 import ScopeInline from '../components/ScopeInline.astro';
 import type { GlossaryEntry, Kind } from '../scripts/glossary';
 import { getEntries } from 'astro:content';
 import Todo from '../components/Todo.astro';
 import RefPath from '../components/RefPath.astro';
 import ItemOverview from '../components/ItemOverview.astro';
+import Punc from '../components/syntax/Punc.astro';
 
 type Props = MarkdownLayoutProps<{
     slug: ValidContentEntrySlug<'glossary'>
@@ -30,12 +30,13 @@ const item = await getEntry('glossary', slug);
 const parameters: { param: GlossaryEntry, typeOptions: GlossaryEntry[] }[] | undefined = item.data.parameters && await Promise.all(
     item.data.parameters.map(async (ref) => {
         const param = await getEntry(ref);
-        const typeOptions = await getEntries(param.data.type!);
+        const typeOptions = await getEntries(param.data.typeUnion!);
         return { param, typeOptions };
     }
 ));
 
 const members = item.data.members;
+const traits: GlossaryEntry[] = (item.data.traits && item.data.traits.length !== 0) ? await getEntries(item.data.traits) : [];
 ---
 
 <ModulePage title={slug.split('/').at(-1)!} item={item}>
@@ -44,13 +45,18 @@ const members = item.data.members;
         {Object.entries(item.data.aliases).map(([alias, kind]) =>
             <tr>
                 <td><Keyword tkn={kind}/></td>
-                <td><Ref item={item}>{alias}</Ref></td>
-                <td>{kind === item.data.kind ? '=' : '~'}&nbsp;<Ref item={item}/></td>
+                <td>&nbsp;</td>
+                <td><Ref item={item} overrideKind={kind}>{alias}</Ref></td>
+                <td>&nbsp;<Punc ch={kind === item.data.kind ? '=' : '~'}/>&nbsp;</td>
+                <td><Ref item={item}/><Punc ch=';'/></td>
             </tr>
         )}
     </table>}
 
-    <h1><Keyword tkn={item.data.kind}/> <Ref item={item}/></h1>
+    <h1><Keyword tkn={item.data.kind}/> <Ref item={item}/>
+    {traits.length !== 0 && <><Keyword tkn="implements"/> <Ref item={traits[0]}/>{
+        traits.slice(1).map((trait) => <><Punc ch=" + "/><Ref item={trait}/></>)
+    }</>}</h1>
 
     <ScopeBlock>
         {item.data.notation && <>
@@ -66,7 +72,7 @@ const members = item.data.members;
             <ul class="parameter-list">
                 {parameters.map(({ param, typeOptions }) => <>
                     <h3><Comment><Todo/></Comment></h3>
-                    <li><Ref item={param}/>: {typeOptions.map(type => <RefPath item={type} tooltips/>)}</li>
+                    <li><Ref item={param}/><Punc ch=":"/> {typeOptions.map(type => <RefPath item={type} tooltips/>)}</li>
                 </>)}
             </ul>
         </>}
@@ -87,7 +93,7 @@ const members = item.data.members;
                 <ScopeBlock>
                     {members.fields.map(async (ref) => {
                         const field = await getEntry(ref);
-                        return <Field item={field} itemType={field.data.type} symbol={''}/>
+                        return <Field item={field} symbol={''}/>
                     })}
                 </ScopeBlock>
             </>}

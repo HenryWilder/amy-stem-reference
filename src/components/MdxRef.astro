@@ -3,6 +3,7 @@ import { getEntry } from "astro:content";
 import Ref from "./Ref.astro";
 import type { GlossaryEntry } from "../scripts/glossary";
 import type { CollectionEntry } from "astro:content";
+import LilRef from "./LilRef.astro";
 
 interface Props {
     slug: string;
@@ -15,5 +16,4 @@ if (item === undefined) {
     throw new Error(`Could not get the glossary entry associated with the slug '${slug}'`);
 }
 ---
-
-<Ref item={item}><slot/></Ref>
+<Ref item={item}><slot>{slug.split('/').at(-1)}</slot></Ref>

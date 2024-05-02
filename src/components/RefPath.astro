@@ -6,6 +6,7 @@ import { getEntry } from 'astro:content';
 import type { ValidContentEntrySlug } from 'astro:content';
 import Ref from './Ref.astro';
 import { getEntries } from 'astro:content';
+import Punc from './syntax/Punc.astro';
 
 export interface Props {
     item: GlossaryEntry;
@@ -17,8 +18,16 @@ const { item, tooltips } = Astro.props;
 const slugs = item.slug.split('/').map((_, index, list) => list.slice(0, index + 1).join('/') as ValidContentEntrySlug<'glossary'>);
 // console.log(slugs);
 const path: GlossaryEntry[] = await getEntries(slugs.map((slug) => ({ collection: 'glossary', slug })));
+const connector: ('@' | '::')[] = path.slice(1).map(({ data: { kind } }) => {
+    switch (kind) {
+        case 'parameter':
+            return '@';
+        default:
+            return '::';
+    }
+});
 ---
 
-{tooltips ? <Ref item={path[0]}/> : <LilRef item={path[0]}/>}{path.slice(1).map((part) =>
-    <><span style="cursor:default">::</span>{tooltips ? <Ref item={part}/> : <LilRef item={part}/>}</>
+{tooltips ? <Ref item={path[0]}/> : <LilRef item={path[0]}/>}{path.slice(1).map((part, index) =>
+    <><Punc ch={connector[index]}/>{tooltips ? <Ref item={part}/> : <LilRef item={part}/>}</>
 )}
