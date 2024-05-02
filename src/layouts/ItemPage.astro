@@ -17,6 +17,7 @@ import type { GlossaryEntry } from '../scripts/glossary';
 import { getEntries } from 'astro:content';
 import Todo from '../components/Todo.astro';
 import RefPath from '../components/RefPath.astro';
+import ItemOverview from '../components/ItemOverview.astro';
 
 type Props = MarkdownLayoutProps<{
     slug: ValidContentEntrySlug<'glossary'>
@@ -67,12 +68,10 @@ const parameters: { param: GlossaryEntry, typeOptions: GlossaryEntry[] }[] | und
 
             {item.data.members.types.length !== 0 && <>
                 <h3 id="types"><Comment>Types</Comment></h3>
-                <ScopeBlock>
-                    {item.data.members.types.map(async (ref) => {
-                        const field = await getEntry(ref);
-                        return <Field item={field} itemType={field.data.type} symbol={''}/>
-                    })}
-                </ScopeBlock>
+                {item.data.members.types.map(async (ref) => {
+                    const type = await getEntry(ref);
+                    return <ItemOverview item={type}/>
+                })}
             </>}
 
             {item.data.members.fields.length !== 0 && <>
