@@ -2,12 +2,19 @@
 import '../styles/style.css';
 import '../styles/vars.css';
 import '../styles/tooltip.css';
+
+interface Props {
+    title?: string;
+}
+
+const { title } = Astro.props;
 ---
 
 <html lang="en">
 	<head>
 		<meta charset="utf-8" />
 		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+        <!-- For Katex styling -->
 		<link
             rel="stylesheet"
             href="https://cdn.jsdelivr.net/npm/katex@0.16.10/dist/katex.min.css"
@@ -16,6 +23,7 @@ import '../styles/tooltip.css';
         >
 		<meta name="viewport" content="width=device-width" />
 		<meta name="generator" content={Astro.generator} />
+        {title && <title>{title}</title>}
         <slot name="head"></slot>
         <style>
             .katex-version {display: none;}
@@ -24,6 +32,8 @@ import '../styles/tooltip.css';
 	</head>
 	<body>
         <slot></slot>
-        {Astro.url.href !== Astro.url.origin ? <a href="/" style="color: rgba(255,255,255,0.25);display:block;">glossary</a> : <></>}
+        <footer>
+            <a href="/" style="color: rgba(255,255,255,0.25);display:block;">glossary</a>
+        </footer>
 	</body>
 </html>

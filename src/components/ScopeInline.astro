@@ -1,9 +1,13 @@
 ---
 interface Props {
-    delimiters: [string, string];
+    delim: [string, string] | string;
 }
 
-const { delimiters } = Astro.props;
+const { delim } = Astro.props;
+
+if (typeof delim === 'string' && delim.length !== 2) {
+    throw new Error(`The ScopeInline delimiter "${delim}" should be exactly two elements`);
+}
 ---
 
-<span class="scope inline"><span class="scope-delimiter">{delimiters[0]}</span><slot></slot><span class="scope-delimiter">{delimiters[1]}</span></span>
+<span class="scope inline"><span class="scope-delimiter">{delim[0]}</span><slot></slot><span class="scope-delimiter">{delim[1]}</span></span>

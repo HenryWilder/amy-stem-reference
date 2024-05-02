@@ -1,22 +1,23 @@
 ---
-import { type ItemPath, getGlossaryItem, glossary } from "../scripts/glossary";
-import ModuleOverviewItem from "./ModuleOverviewItem.astro";
+import type { ValidContentEntrySlug } from "astro:content";
+import ItemOverview from "./ItemOverview.astro";
 import ScopeBlock from "./ScopeBlock.astro";
 import Keyword from "./syntax/Keyword.astro";
 import Module from "./syntax/Module.astro";
+import { getCollection } from "astro:content";
 
 interface Props {
-    mod: string;
+    /** The module's slug */
+    module: ValidContentEntrySlug<'glossary'>;
 }
 
-const { mod } = Astro.props;
-
-const list: ItemPath[] = Object.keys(glossary[mod]).map((key: string) => [mod, key]);
+const { module } = Astro.props;
+const items = await getCollection('glossary', (entry) => entry.slug.match(RegExp(`^${module}/[^/]+$`)));
 ---
 
-<h2><Keyword tkn="module"/> <Module tkn={mod}/></h2>
+<h2><Keyword tkn="module"/> <Module tkn={module}/></h2>
 <ScopeBlock>
     <ul class="glossary-list">
-        {list.map((path) => <li><ModuleOverviewItem path={path}/></li>)}
+        {items.map((item) => <li><ItemOverview item={item}/></li>)}
     </ul>
 </ScopeBlock>

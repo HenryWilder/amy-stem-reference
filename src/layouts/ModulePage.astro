@@ -1,33 +1,17 @@
 ---
 import PageBase from './PageBase.astro';
-import Keyword from '../components/syntax/Keyword.astro';
-import Module from '../components/syntax/Module.astro';
-import { getGlossaryItem, type GlossaryItem, type ItemPath } from '../scripts/glossary';
-import Ref from '../components/Ref.astro';
-import type { ValidKeyword } from '../scripts/syntax';
+import RefPath from '../components/RefPath.astro';
+import type { GlossaryEntry } from '../scripts/glossary';
 
 interface Props {
-    path: ItemPath;
+    title: string;
+    item: GlossaryEntry;
 }
 
-const { path } = Astro.props;
-const module = path[0];
-const items: { kw: ValidKeyword, subPath: ItemPath, item: GlossaryItem }[] = path.slice(1).map((key, index) => {
-    index += 1;
-    const subPath: ItemPath = [module, ...path.slice(1, index), key];
-    const item = getGlossaryItem(subPath);
-    const kw: ValidKeyword = item.kind;
-    return { kw, subPath, item }
-});
+const { title, item } = Astro.props;
 ---
 
-<PageBase>
-    <Fragment slot='head'>
-        <title>{path.at(-1)}</title>
-    </Fragment>
-    <strong>
-        <Keyword tkn="module"/> <Module tkn={module}/>
-        {items.slice(0, -1).map(({ kw, subPath }) => <><span class="no-touchy"> :: </span><Keyword tkn={kw}/> <Ref path={subPath}/></>)}
-    </strong>
+<PageBase title={title}>
+    <RefPath item={item}/>
     <slot></slot>
 </PageBase>

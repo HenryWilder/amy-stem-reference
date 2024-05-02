@@ -1,4 +1,5 @@
 :root {
     --background-main: #101217;
     --background-tooltip: #20242DF0;
+    --indent-size: 2ch;
 }

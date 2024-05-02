@@ -1,0 +1,19 @@
+---
+import { getEntry } from "astro:content";
+import Ref from "./Ref.astro";
+import type { GlossaryEntry } from "../scripts/glossary";
+import type { CollectionEntry } from "astro:content";
+
+interface Props {
+    slug: string;
+}
+
+const { slug } = Astro.props;
+
+const item: GlossaryEntry | undefined = await getEntry('glossary', slug);
+if (item === undefined) {
+    throw new Error(`Could not get the glossary entry associated with the slug '${slug}'`);
+}
+---
+
+<Ref item={item}><slot/></Ref>

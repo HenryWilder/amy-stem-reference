@@ -1,42 +1,41 @@
 ---
-import type { ItemLink } from '../scripts/glossary';
-import { getGlossaryItem, type GlossaryItem, type ItemPath, type DescriptionLine } from '../scripts/glossary';
-import { relToPath } from '../scripts/glossary-data';
-import Katex from './Katex.astro';
-import LilRef from './LilRef.astro';
-import Ref from './Ref.astro';
+// import type { Item, ItemLink } from '../scripts/glossary';
+// import { getGlossaryItem, type GlossaryItem, type ItemPath, type DescriptionLine } from '../scripts/glossary';
+// import { relToPath } from '../scripts/glossary-data';
+// import Katex from './Katex.astro';
+// import LilRef from './LilRef.astro';
+// import Ref from './Ref.astro';
 
-interface Props {
-    /** brief: only use first paragraph */
-    brevity: 'full' | 'brief';
+// interface Props {
+//     /** The item we want the description of */
+//     item: Item;
 
-    /** inline: display as <span> insteaad of <p> */
-    display: 'block' | 'inline';
+//     /** brief: only use first paragraph */
+//     brevity: 'full' | 'brief';
 
-    /** Whether the links should have a tooltip or not */
-    links: 'tooltip' | 'no-tooltip';
+//     /** inline: display as <span> insteaad of <p> */
+//     display: 'block' | 'inline';
 
-    path: ItemPath;
+//     /** Whether the links should have a tooltip or not */
+//     links: 'tooltip' | 'no-tooltip';
+// }
 
-    item?: GlossaryItem;
-}
+// const { item, brevity, display, links } = Astro.props;
 
-const { brevity, display, links, path, item = getGlossaryItem(path) } = Astro.props;
+// const description: string = (() => {
+//     switch (brevity) {
+//         case 'full':
+//             return item.description;
 
-const description: DescriptionLine[] = (() => {
-    switch (brevity) {
-        case 'full':
-            return item.description;
+//         case 'brief':
+//             return item.brief;
+//     }
+// })();
 
-        case 'brief':
-            return [item.description[0]];
-    }
-})();
-
-const isTex = (x: ItemLink | { tex: string }): x is { tex: string } => Object.hasOwn(x, 'tex');
+// const isTex = (x: ItemLink | { tex: string }): x is { tex: string } => Object.hasOwn(x, 'tex');
 ---
 
-{
+<!-- {
     description.map((line) => {
         const inner = line.map((segment) => {
             if (typeof segment === 'string') {
@@ -64,4 +63,4 @@ const isTex = (x: ItemLink | { tex: string }): x is { tex: string } => Object.ha
                 return <span>{inner}</span>;
         }
     })
-}
+} -->

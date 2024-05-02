@@ -1,0 +1,25 @@
+---
+layout: /./src/layouts/ItemPage.astro
+slug: basic/scalar
+kind: type
+aliases:
+- number
+- numeric
+notation: x
+members:
+  types:
+  - basic/scalar/int
+  fields: []
+  methods:
+  - basic/scalar/pow
+---
+import Ref from '/./src/components/MdxRef.astro';
+export const scalar = "basic/scalar";
+export const pow = "basic/scalar/pow";
+
+Hello world
+
+{/* <Ref slug={scalar}>Test</Ref> apple <Ref slug={scalar}>Test</Ref> */}
+
+{/* <Ref slug={pow}>Exponent</Ref> */}
+

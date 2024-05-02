@@ -1,33 +1,20 @@
 ---
-import { type ItemPath, type GlossaryItem, type Kind, getGlossaryItem, itemPathToHref } from '../scripts/glossary';
-import ItemDescription from './ItemDescription.astro';
+import { type GlossaryEntry } from '../scripts/glossary';
+import LilRef from './LilRef.astro';
 import RefPath from './RefPath.astro';
 
-interface Props {
-    /** Path to the reference */
-    path: ItemPath;
-
-    /** The text to display - defaults to the final part of `path` */
-    text?: string;
-
-    /** The kind to EXPECT the reference to have (enforcement) */
-    mustBe?: Kind;
+export interface Props {
+    item: GlossaryEntry;
 }
 
-const { path, text = path.at(-1), mustBe } = Astro.props;
-
-/** Data about the item we are referencing */
-const item: GlossaryItem = getGlossaryItem(path);
-
-if (mustBe !== undefined && item.kind !== mustBe) {
-    throw new Error(`Expected an item of kind '${mustBe}', ${itemPathToHref(path)} has the kind '${item.kind}'`);
-}
+const { item } = Astro.props;
+if (item === undefined) throw new Error(`Cannot reference undefined`);
 ---
 
 <div class="tooltip">
-    <a href={itemPathToHref(path)} class={item.kind}>{text}</a>
+    <LilRef item={item}><slot>{item.slug.split('/').at(-1)}</slot></LilRef>
     <span class="tooltiptext">
-        <RefPath path={path}/><br/><br/>
-        <ItemDescription path={path} item={item} brevity="brief" links="no-tooltip" display="block"/>
+        <RefPath item={item}/>
+        <p></p>
     </span>
 </div>

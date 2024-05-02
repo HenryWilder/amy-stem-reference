@@ -1,19 +1,18 @@
 ---
-import { type ItemPath } from '../scripts/glossary';
 import Ref from "./Ref.astro";
 import Comment from "./syntax/Comment.astro";
 import Katex from "./Katex.astro";
 import ItemDescription from './ItemDescription.astro';
 
 interface Props {
-    path: ItemPath;
-    ty: ItemPath;
+    item: any; // todo
+    itemType: any; // todo
     symbol: string;
 }
 
-const { path, ty, symbol } = Astro.props;
+const { item, itemType, symbol } = Astro.props;
 ---
 
 <h3><Comment><Katex tex={symbol}></Comment> in <a href="#notation">notation</a></h3>
-<Comment><ItemDescription path={path} brevity="brief" display="inline" links="tooltip"/></Comment><br/>
-<Ref path={path} mustBe="field"/>: <Ref path={ty} mustBe="type"/>
+<!-- <Comment><ItemDescription path={path} brevity="brief" display="inline" links="tooltip"/></Comment><br/> -->
+<Ref item={item}/>: <Ref item={itemType}/>

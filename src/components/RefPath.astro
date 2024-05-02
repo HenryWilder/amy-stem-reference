@@ -1,24 +1,24 @@
 ---
-import Module from './syntax/Module.astro';
-import { type GlossaryItem, type ItemPath, type Kind, getGlossaryItem, itemPathToHref } from '../scripts/glossary';
+import { getCollection } from 'astro:content';
+import { type GlossaryEntry } from '../scripts/glossary';
+import LilRef from './LilRef.astro';
+import { getEntry } from 'astro:content';
+import type { ValidContentEntrySlug } from 'astro:content';
+import Ref from './Ref.astro';
+import { getEntries } from 'astro:content';
 
-interface Props {
-    path: ItemPath;
+export interface Props {
+    item: GlossaryEntry;
+    tooltips?: true;
 }
 
-const { path } = Astro.props;
-const module = path[0];
+const { item, tooltips } = Astro.props;
 
-const pathItems: { kind: Kind, href: string, part: string }[] = path.slice(1).map((part: string, index: number) => {
-    index += 1; // Account for slice
-    const subPath: ItemPath = [module, ...path.slice(1, index), part];
-    const item: GlossaryItem = getGlossaryItem(subPath);
-    const kind: Kind = item.kind;
-    const href: string = itemPathToHref(subPath);
-    return { kind, href, part };
-});
+const slugs = item.slug.split('/').map((_, index, list) => list.slice(0, index + 1).join('/') as ValidContentEntrySlug<'glossary'>);
+// console.log(slugs);
+const path: GlossaryEntry[] = await getEntries(slugs.map((slug) => ({ collection: 'glossary', slug })));
 ---
 
-<Module tkn={module}/>{pathItems.map(({ kind, href, part }, index) =>
-    <><span style="cursor:default">::</span><a class={kind} href={href}>{part}</a></>
+{tooltips ? <Ref item={path[0]}/> : <LilRef item={path[0]}/>}{path.slice(1).map((part) =>
+    <><span style="cursor:default">::</span>{tooltips ? <Ref item={part}/> : <LilRef item={part}/>}</>
 )}

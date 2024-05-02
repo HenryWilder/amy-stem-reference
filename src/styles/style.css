@@ -40,6 +40,14 @@ a {
 .comment {
     color: seagreen;
     cursor: default;
+
+    &::before {
+        content: '/* ';
+    }
+
+    &::after {
+        content: ' */';
+    }
 }
 
 h3 {
@@ -63,8 +71,79 @@ h3 {
 }
 
 ul.alias-list {
-    list-style-type: square;
-    padding-left: 2ch;
+    list-style-type: none;
+    padding-left: 0;
+    margin-left: 0;
+}
+
+table.alias-list {
+    border-collapse: collapse;
+
+    td:nth-child(2) {
+        padding-left: 1ch;
+
+        &::before {
+            content: '= ';
+            color: lightgray;
+        }
+
+        &::after {
+            content: ';';
+            color: lightgray;
+        }
+    }
+}
+
+ul.parameter-list {
+    list-style-type: none;
+    padding-left: 0;
+    margin-left: 0;
+}
+
+table.parameter-list {
+    border-collapse: collapse;
+
+    td {
+        &:nth-child(1) {
+            padding-left: var(--indent-size);
+        }
+
+        &:nth-child(2) {
+            padding-left: 1ch;
+
+            &::before {
+                content: ': ';
+                color: lightgray;
+            }
+
+            &::after {
+                content: ',';
+                color: lightgray;
+            }
+        }
+    }
+}
+
+.item-description {
+    background-color: var(--background-main);
+    border: 1px solid color-mix(in srgb, var(--scope-color) 40%, transparent);
+    transition: border-color 70ms ease-in-out;
+    border-radius: 0.5em;
+    padding: 8px;
+
+    > p {
+        &:first-child {
+            margin-top: 0;
+        }
+
+        &:last-child {
+            margin-bottom: 0;
+        }
+    }
+}
+
+.scope:hover > .item-description {
+    border-color: color-mix(in srgb, var(--scope-color) 25%, transparent);
 }
 
 .scope {
@@ -92,11 +171,10 @@ ul.alias-list {
 }
 
 .scope {
-    &.block {
+    .block {
         width: max-content;
         border: 4px solid var(--scope-color);
-        border-left-width: 1px;
-        border-right: none;
+        border-inline: 1px solid color-mix(in srgb, var(--scope-color) 30%, transparent);
         border-radius: 1rem;
         padding: 1em 2ch;
         margin: 1em 0;
@@ -109,6 +187,32 @@ ul.alias-list {
 
     &.inline > .scope-delimiter {
         color: var(--scope-color);
+    }
+}
+
+.brace-scope-container {
+    display: flex;
+    flex-flow: column nowrap;
+    align-items: center;
+    width: fit-content;
+    gap: 0;
+    margin: 0.5em 0;
+
+    .block {
+        margin: 0;
+    }
+
+    .brace-spike {
+        content: '';
+        border: 0.5em solid transparent;
+
+        &:first-of-type {
+            border-bottom-color: var(--scope-color);
+        }
+
+        &:last-of-type {
+            border-top-color: var(--scope-color);
+        }
     }
 }
 

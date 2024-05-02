@@ -1,61 +1,99 @@
 ---
-import Field from '../components/Field.astro';
-import ItemDescription from '../components/ItemDescription.astro';
-import Katex from '../components/Katex.astro';
-import Method from '../components/Method.astro';
+import { type MarkdownLayoutProps } from 'astro';
+import ModulePage from './ModulePage.astro';
+import type { ValidContentEntrySlug } from 'astro:content';
+import { getEntry } from 'astro:content';
+import Comment from '../components/syntax/Comment.astro';
+import type { ValidKeyword } from '../scripts/syntax';
+import Keyword from '../components/syntax/Keyword.astro';
 import Ref from '../components/Ref.astro';
 import ScopeBlock from '../components/ScopeBlock.astro';
-import Comment from '../components/syntax/Comment.astro';
-import Keyword from '../components/syntax/Keyword.astro';
-import { type GlossaryItem, type ItemPath, getGlossaryItem } from '../scripts/glossary';
-import type { ValidKeyword } from '../scripts/syntax';
-import ModulePage from './ModulePage.astro';
+import Katex from '../components/Katex.astro';
+import Field from '../components/Field.astro';
+import Method from '../components/Method.astro';
+import Alias from '../components/Alias.astro';
+import ScopeInline from '../components/ScopeInline.astro';
+import type { GlossaryEntry } from '../scripts/glossary';
+import { getEntries } from 'astro:content';
+import Todo from '../components/Todo.astro';
+import RefPath from '../components/RefPath.astro';
 
-interface Props {
-    path: ItemPath;
-}
+type Props = MarkdownLayoutProps<{
+    slug: ValidContentEntrySlug<'glossary'>
+}>;
 
-const { path } = Astro.props;
+const { frontmatter: { slug } } = Astro.props;
 
-/** Data about the item we are referencing */
-const item: GlossaryItem = getGlossaryItem(path);
+const item = await getEntry('glossary', slug);
 
-type GlossaryEntry = { path: ItemPath, item: GlossaryItem };
-
-const properties: GlossaryEntry[] = item.properties ? Object.entries(item.properties).map(([key, item]) => ({ path: [...path, key], item })) : [];
-const fieldProps: GlossaryEntry[] = properties.filter(({ item }) => item.kind === 'field');
-const functionProps: GlossaryEntry[] = properties.filter(({ item }) => item.kind === 'function');
+const parameters: { param: GlossaryEntry, typeOptions: GlossaryEntry[] }[] | undefined = item.data.parameters && await Promise.all(
+    item.data.parameters.map(async (ref) => {
+        const param = await getEntry(ref);
+        const typeOptions = await getEntries(param.data.type!);
+        return { param, typeOptions };
+    }
+));
 ---
 
-<ModulePage path={path}>
-    <h1><Keyword tkn={item.kind as ValidKeyword}/> <Ref path={path}/></h1>
+<ModulePage title={slug.split('/').at(-1)!} item={item}>
+    {item.data.aliases && <h2 id="aliases"><Comment>Aliases</Comment></h2>
+    <table class="alias-list">
+        {item.data.aliases?.map((alias: string) => <Alias of={item}>{alias}</Alias>)}
+    </table>}
+
+    <h1><Keyword tkn={item.data.kind}/> <Ref item={item}/></h1>
 
     <ScopeBlock>
-        <h2 id="aliases"><Comment>Aliases</Comment></h2>
-        <ul class="alias-list">
-            {item.aliases.map((alias: string) => <li>{alias}</li>)}
-        </ul>
-
-        {item.notation && <>
+        {item.data.notation && <>
             <h2 id="notation"><Comment>Notation</Comment></h2>
-            <Katex tex={item.notation}/>
+            <Katex tex={item.data.notation}/>
         </>}
 
         <h2 id="description"><Comment>Description</Comment></h2>
-        <ItemDescription path={path} item={item} brevity="full" links="tooltip" display="block"/>
+        <div class="item-description"><slot/></div>
 
-        {fieldProps.length !== 0 && <>
-            <h2 id="fields"><Comment>Fields</Comment></h2>
-            <ScopeBlock>
-                {fieldProps.map(({ path, item }) => <Field path={path} ty={item.fieldData!.ty} symbol={item.fieldData!.notationRef}/>)}
-            </ScopeBlock>
+        {parameters && <>
+            <h2><Comment>Parameters</Comment></h2>
+            <ul class="parameter-list">
+                {parameters.map(({ param, typeOptions }) => <>
+                    <h3><Comment><Todo/></Comment></h3>
+                    <li><Ref item={param}/>: {typeOptions.map(type => <RefPath item={type} tooltips/>)}</li>
+                </>)}
+            </ul>
         </>}
 
-        {functionProps.length !== 0 && <>
-            <h2 id="methods"><Comment>Methods</Comment></h2>
-            <ScopeBlock>
-                {functionProps.map(({ path }) => <Method path={path}/>)}
-            </ScopeBlock>
+        {item.data.members && <>
+            <h2><Comment>Members</Comment></h2>
+
+            {item.data.members.types.length !== 0 && <>
+                <h3 id="types"><Comment>Types</Comment></h3>
+                <ScopeBlock>
+                    {item.data.members.types.map(async (ref) => {
+                        const field = await getEntry(ref);
+                        return <Field item={field} itemType={field.data.type} symbol={''}/>
+                    })}
+                </ScopeBlock>
+            </>}
+
+            {item.data.members.fields.length !== 0 && <>
+                <h3 id="fields"><Comment>Fields</Comment></h3>
+                <ScopeBlock>
+                    {item.data.members.fields.map(async (ref) => {
+                        const field = await getEntry(ref);
+                        return <Field item={field} itemType={field.data.type} symbol={''}/>
+                    })}
+                </ScopeBlock>
+            </>}
+
+            {item.data.members.methods.length !== 0 && <>
+                <h3 id="methods"><Comment>Methods</Comment></h3>
+                <ScopeBlock>
+                    {item.data.members.methods.map(async (ref) => {
+                        const method = await getEntry(ref);
+                        return <Method item={method}/>;
+                    })}
+                </ScopeBlock>
+            </>}
         </>}
     </ScopeBlock>
 </ModulePage>

@@ -1,16 +1,18 @@
 ---
+import type { ValidContentEntrySlug } from "astro:content";
 import ModuleOverview from "../components/ModuleOverview.astro";
 import Comment from "../components/syntax/Comment.astro";
 import GlossaryPage from "./GlossaryPage.astro";
+import { type MarkdownLayoutProps } from 'astro';
 
-interface Props {
-    module: string;
-}
+type Props = MarkdownLayoutProps<{
+    slug: ValidContentEntrySlug<'glossary'>
+}>;
 
-const { module } = Astro.props;
+const { frontmatter: { slug } } = Astro.props;
 ---
 
-<GlossaryPage title={module}>
-    <h1><Comment>The {module} module</Comment></h1>
-    <ModuleOverview mod={module}/>
+<GlossaryPage title={slug}>
+    <h1><Comment>The {slug} module</Comment></h1>
+    <ModuleOverview module={slug}/>
 </GlossaryPage>

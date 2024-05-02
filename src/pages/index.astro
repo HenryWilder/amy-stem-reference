@@ -1,15 +1,15 @@
 ---
-import { anim } from '../scripts/animated-tex';
-import Katex from '../components/Katex.astro';
+import { getCollection } from 'astro:content';
 import ModuleOverview from '../components/ModuleOverview.astro';
 import Comment from '../components/syntax/Comment.astro';
 import GlossaryPage from '../layouts/GlossaryPage.astro';
-import { glossary } from '../scripts/glossary';
+import type { CollectionEntry } from 'astro:content';
+
+const modules = await getCollection('glossary', (entry) => entry.data.kind === 'module');
 ---
 
 <GlossaryPage title='Glossary'>
 	<h1><Comment>Glossary</Comment></h1>
-	{Object.keys(glossary).map((mod: string) => <ModuleOverview mod={mod}/>)}
-	<Katex tex={`{\\color{deepskyblue}{f}} ({\\color{lightgreen}{${anim('x', 'y', 'z')}}}) = 2{\\color{tomato}{${anim('x', 'y', 'z', 'w')}}}`}/>
-	<br/>
+	{modules.map((module) => <ModuleOverview module={module.slug}/>)}
+	<!-- <Katex tex={`{\\color{deepskyblue}{f}} ({\\color{lightgreen}{${anim('x', 'y', 'z')}}}) = 2{\\color{tomato}{${anim('x', 'y', 'z', 'w')}}}`}/> -->
 </GlossaryPage>
