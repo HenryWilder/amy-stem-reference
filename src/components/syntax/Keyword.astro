@@ -16,6 +16,8 @@ const validKeywords = [
     'implements',
     'assign',
     'similar to',
+    'end of statement',
+    'separator',
 ];
 
 export type ValidKeyword = (typeof validKeywords)[number];
@@ -28,7 +30,7 @@ interface Props {
 
 const { tkn } = Astro.props;
 
-const tokenData: Record<ValidKeyword, { symbol: any, description: string, keywordType?: 'control' | 'punctuation' }> = {
+const tokenData: Record<ValidKeyword, { symbol: any, description: string, keywordType?: 'keyword' | 'control' | 'punctuation' }> = {
     'assign': {
         symbol: '=',
         description: 'the preceding item is equal to the following item',
@@ -37,6 +39,16 @@ const tokenData: Record<ValidKeyword, { symbol: any, description: string, keywor
     'similar to': {
         symbol: '~',
         description: 'the preceding item is similar to the following item',
+        keywordType: 'punctuation',
+    },
+    'separator': {
+        symbol: ',',
+        description: 'designates that the item is followed by another item',
+        keywordType: 'punctuation',
+    },
+    'end of statement': {
+        symbol: ';',
+        description: 'designates that the statement is complete',
         keywordType: 'punctuation',
     },
     'becomes': {
@@ -116,13 +128,13 @@ const tokenData: Record<ValidKeyword, { symbol: any, description: string, keywor
     },
 };
 
-const { symbol, description, keywordType } = tokenData[tkn];
+const { symbol, description, keywordType = 'keyword' } = tokenData[tkn];
 ---
 
 <Tooltip>
-    <span class:list={['keyword', keywordType]} set:html={symbol}></span>
+    <span class={keywordType} set:html={symbol}></span>
     <Fragment slot="content">
-        <p class:list={['keyword', keywordType]}>'{tkn}' {keywordType} keyword</p>
+        <p class={keywordType}>'{tkn}' {keywordType}</p>
         <p set:html={description}></p>
     </Fragment>
 </Tooltip>

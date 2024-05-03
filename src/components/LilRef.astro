@@ -11,4 +11,4 @@ interface Props {
 const { item, overrideKind = item.data.kind, onPage } = Astro.props;
 ---
 
-<a href={onPage ? '#' + item.slug.replace(/\//g, '+') : '/' + item.slug } class={overrideKind}><slot>{item.slug.split('/').at(-1)!}</slot></a>
+<a href={'#' + item.slug.replace(/\//g, '+')} class={overrideKind}><slot>{item.slug.split('/').at(-1)!}</slot></a>

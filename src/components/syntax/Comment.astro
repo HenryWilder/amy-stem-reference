@@ -1,5 +1,41 @@
 ---
+import Heading from '../Heading.astro';
+import Tooltip from '../Tooltip.astro';
 
+interface Props {
+    /**
+     * The heading level of the comment
+     * (the comment will not be a heading if this is undefined)
+     */
+    hDepth?: number;
+
+    /** Optional heading id of the comment */
+    id?: string;
+
+    /** Optional text of the tooltip for the entire comment */
+    tooltip?: string;
+}
+
+const { hDepth, id, tooltip } = Astro.props;
+
+if (tooltip !== undefined && Astro.slots.has('tooltip')) {
+    throw new Error(`Comment should not have both a tooltip property and tooltip slot --- property: '${tooltip}' slot: '${Astro.slots.render('tooltip')}'`);
+}
 ---
 
-<span class="comment"><slot></slot></span>
+{() => {
+    const comment = <span class="comment"><slot/></span>;
+
+    const withOptionalTooltip = (tooltip !== undefined || Astro.slots.has('tooltip'))
+        ? <Tooltip>
+            {comment}
+            <slot name="tooltip" slot="content">
+                {tooltip}
+            </slot>
+        </Tooltip>
+        : comment;
+
+    return hDepth !== undefined
+        ? <Heading depth={hDepth} id={id}>{withOptionalTooltip}</Heading>
+        : withOptionalTooltip;
+}}

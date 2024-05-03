@@ -46,11 +46,7 @@ a {
     cursor: default;
 
     &::before {
-        content: '/* ';
-    }
-
-    &::after {
-        content: ' */';
+        content: '// ';
     }
 }
 
