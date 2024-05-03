@@ -93,6 +93,12 @@ const debugTreeRecursively = (nodes: GlossaryTreeNode[]) => {
         <span slot="separator">
             {(_item: string, _sepIndex: number, _list: string[], _prevItem: string, isFinal: boolean) => isFinal ? ' and ' : ', '}
         </span>
+        <span slot="outer-single">
+            {(inner: any) => inner}
+        </span>
+        <span slot="outer-plural">
+            {(inner: any) => <>({inner})</>}
+        </span>
     </Join>
     <main>
     {() => {
