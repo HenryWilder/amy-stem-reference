@@ -64,8 +64,8 @@ h3 {
 
 /* todo colorize notation for literal vs variable with button to switch */
 
-.field {
-    color: lightsteelblue;
+.field, .return {
+    color: gray;
 }
 
 .parameter {
@@ -105,10 +105,6 @@ table.parameter-list {
     border-collapse: collapse;
 
     td {
-        &:nth-child(1) {
-            padding-left: var(--indent-size);
-        }
-
         &:nth-child(2) {
             padding-left: 1ch;
 
@@ -170,12 +166,9 @@ table.parameter-list {
 }
 
 .scope {
-    .block {
+    & > .block {
         width: max-content;
         border: 4px solid var(--scope-color);
-        /* border-inline: 1px solid color-mix(in srgb, var(--scope-color) 30%, transparent); */
-        border-inline-width: 0;
-        border-radius: 1rem;
         padding: 1em 2ch;
         margin: 1em 0;
         transition: 70ms ease-in-out;
@@ -185,34 +178,104 @@ table.parameter-list {
         }
     }
 
+    &.vertical {
+        & > .block {
+            /* border-inline: 1px solid color-mix(in srgb, var(--scope-color) 30%, transparent); */
+            border-inline-width: 0;
+        }
+
+        &.brace-scope-container > .block {
+            border-radius: 1em;
+        }
+
+        &.paren-scope-container > .block {
+            border-top-left-radius: 50% 1.5em;
+            border-top-right-radius: 50% 1.5em;
+            border-bottom-left-radius: 50% 1.5em;
+            border-bottom-right-radius: 50% 1.5em;
+        }
+
+        &.brack-scope-container > .block {
+            border-top-left-radius: 4px 1em;
+            border-top-right-radius: 4px 1em;
+            border-bottom-left-radius: 4px 1em;
+            border-bottom-right-radius: 4px 1em;
+        }
+    }
+
+    &.horizontal {
+        & > .block {
+            /* border-block: 1px solid color-mix(in srgb, var(--scope-color) 30%, transparent); */
+            border-block-width: 0;
+        }
+
+        &.brace-scope-container > .block {
+            border-radius: 1em;
+        }
+
+        &.paren-scope-container > .block {
+            border-top-left-radius: 1.5em 50%;
+            border-top-right-radius: 1.5em 50%;
+            border-bottom-left-radius: 1.5em 50%;
+            border-bottom-right-radius: 1.5em 50%;
+        }
+
+        &.brack-scope-container > .block {
+            border-top-left-radius: 1em 4px;
+            border-top-right-radius: 1em 4px;
+            border-bottom-left-radius: 1em 4px;
+            border-bottom-right-radius: 1em 4px;
+        }
+    }
+
     &.inline > .scope-delimiter {
         color: var(--scope-color);
     }
 }
 
-.brace-scope-container {
+.brace-scope-container, .paren-scope-container, .brack-scope-container {
     display: flex;
-    flex-flow: column nowrap;
+
+    &.vertical {
+        flex-flow: column nowrap;
+    }
+
+    &.horizontal {
+        flex-flow: row nowrap;
+    }
+
     align-items: center;
     width: fit-content;
     gap: 0;
     margin: 0.5em 0;
 
-    .block {
+    & > .block {
         margin: 0;
     }
+}
 
-    .brace-spike {
-        content: '';
-        border: 0.5em solid transparent;
+.brace-scope-container > .brace-spike {
+    content: '';
+    border: 0.5em solid transparent;
+}
 
-        &:first-of-type {
-            border-bottom-color: var(--scope-color);
-        }
+.vertical.brace-scope-container > .brace-spike {
+    &:first-of-type {
+        border-bottom-color: var(--scope-color);
+    }
 
-        &:last-of-type {
-            border-top-color: var(--scope-color);
-        }
+    &:last-of-type {
+        border-top-color: var(--scope-color);
+    }
+}
+
+.horizontal.brace-scope-container > .brace-spike {
+    &:first-of-type {
+        border-right-color: var(--scope-color);
+    }
+
+    &:last-of-type {
+        border-left-color: var(--scope-color);
     }
 }
 

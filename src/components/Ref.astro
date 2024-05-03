@@ -9,9 +9,10 @@ export interface Props {
     overrideKind?: Kind;
     /** If true: treats slug as id rather than path */
     onPage?: true;
+    alias?: true;
 }
 
-const { item, overrideKind = item.data.kind, onPage } = Astro.props;
+const { item, overrideKind = item.data.kind, onPage, alias } = Astro.props;
 if (item === undefined) throw new Error(`Cannot reference undefined`);
 const defaultName = item.slug.split('/').at(-1);
 ---
@@ -19,7 +20,7 @@ const defaultName = item.slug.split('/').at(-1);
 <Tooltip>
     <LilRef item={item} overrideKind={overrideKind} onPage={onPage}><slot>{defaultName}</slot></LilRef>
     <Fragment slot="content">
-        <RefPath item={item} onPage={onPage}/>
+        {alias && <span class="keyword">alias of </span>}<RefPath item={item} onPage={onPage}/>
         <p>{item.data.brief}</p>
     </Fragment>
 </Tooltip>

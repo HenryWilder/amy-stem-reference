@@ -1,5 +1,12 @@
 ---
 import ScopeInline from "./ScopeInline.astro";
+
+interface Props {
+    delim?: 'brace' | 'paren' | 'brack';
+    horizontal?: true;
+}
+
+const { delim = 'brace', horizontal } = Astro.props;
 ---
 
 <style>
@@ -17,15 +24,21 @@ import ScopeInline from "./ScopeInline.astro";
     }
 </style>
 
-<details open>
-    <summary>
-        <slot name="summary"></slot><span class="hide-when-open"> <ScopeInline delim="{}">...</ScopeInline></span>
-    </summary>
-    <div class="scope brace-scope-container">
-        <span class="brace-spike"></span>
+{() => {
+    const inner = <div class:list={['scope', delim + '-scope-container', horizontal ? 'horizontal' : 'vertical']}>
+        {delim === 'brace' && <span class="brace-spike"></span>}
         <div class="block">
             <slot></slot>
         </div>
-        <span class="brace-spike"></span>
+        {delim === 'brace' && <span class="brace-spike"></span>}
     </div>
-</details>
+
+    return Astro.slots.has('summary')
+        ? <details open>
+            <summary>
+                <slot name="summary"></slot><span class="hide-when-open"> <ScopeInline delim="{}">...</ScopeInline></span>
+            </summary>
+            {inner}
+        </details>
+        : <div>{inner}</div>
+}}

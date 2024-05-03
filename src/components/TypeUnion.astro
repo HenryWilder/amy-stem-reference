@@ -6,10 +6,11 @@ import Punc from './syntax/Punc.astro';
 
 interface Props {
     list: GlossaryRef[];
+    onPage?: true;
 }
 
-const { list } = Astro.props;
+const { list, onPage } = Astro.props;
 const types = await getEntries(list);
 ---
 
-<Ref item={types[0]}/>{types.slice(1).map((ty) => <><Punc ch=" | "/><Ref item={ty}/></>)}
+<Ref item={types[0]} onPage={onPage}/>{types.slice(1).map((ty) => <><Punc ch=" | "/><Ref item={ty} onPage={onPage}/></>)}

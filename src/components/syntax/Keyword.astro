@@ -14,7 +14,7 @@ const tokenData: Record<ValidKeyword, [string, string]> = {
     'function': ['fn', 'takes parameters and produces a result'],
     'module': ['mod', 'an entire area of a study'],
     'field': ['pub', 'a part of an object'],
-    'parameter': ['param', 'an input to a function'],
+    'parameter': ['@param', 'an input to a function'],
     'implements': ['impl', 'the object follows the template of this trait'],
     'extends': ['extends', 'the object builds upon the template of this type'],
     'null': ['null', 'nothing'],
@@ -32,7 +32,7 @@ const classList = ["keyword", isControl ? 'control' : undefined];
 <Tooltip>
     <span class:list={classList} set:html={symbol}></span>
     <Fragment slot="content">
-        <p class:list={classList}>keyword: {tkn}</p>
+        <p class:list={classList}>'{tkn}' keyword</p>
         <p>{description}</p>
     </Fragment>
 </Tooltip>

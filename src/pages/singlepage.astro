@@ -8,7 +8,9 @@ import Keyword from "../components/syntax/Keyword.astro";
 import Comment from "../components/syntax/Comment.astro";
 import Heading from "../components/Heading.astro";
 import Punc from "../components/syntax/Punc.astro";
-import '../styles/style.css';
+import TypeUnion from "../components/TypeUnion.astro";
+import ScopeInline from "../components/ScopeInline.astro";
+import { getEntry } from "astro:content";
 
 const getChildren = async (parent: ValidGlossarySlug, filter?: (entry: GlossaryEntry) => boolean): Promise<GlossaryEntry[]> => {
     const parentPath = parent.split('/');
@@ -67,18 +69,28 @@ debugTreeRecursively(tree);
 
 const properCase = (kind: Kind): string => {
     const mapping: Record<Kind, string> = {
-        function:  'Functions',
+        function:  'Methods',
         type:      'Types',
         field:     'Fields',
-        parameter: 'Parameters',
+        parameter: 'Arguments',
         trait:     'Traits',
-        module:    'Modules',
+        module:    'Modules', // unused
     };
     return mapping[kind];
 }
 ---
 
 <PageBase title="Amy's STEM Notes">
+    <Fragment slot="head">
+        <style>
+            main {
+                display: flex;
+                flex-flow: row nowrap;
+                gap: 3em;
+            }
+        </style>
+    </Fragment>
+    <main>
     {() => {
         const renderTree = async (nodes: GlossaryTreeNode[], depth: number) => {
             return nodes.map(async (node: GlossaryTreeNode) => {
@@ -87,42 +99,112 @@ const properCase = (kind: Kind): string => {
                     async ([kind, children]): Promise<[Kind, any[]]> => [kind, await renderTree(children, depth + 1)]
                 ));
                 const Description = (await item.render()).Content;
+                const innerDepth = depth + 1;
                 return <>
                     <ScopeBlock>
                         {/* Title */}
                         <Fragment slot="summary">
-                            <Heading depth={depth} id={item.slug.replace(/\//g, '+')}>
-                                <Keyword tkn={item.data.kind}/> <Ref item={item} onPage/>
-                            </Heading>
+                                {() => {
+                                    const id = item.slug.replace(/\//g, '+');
+                                    switch (item.data.kind) {
+                                        case 'function':
+                                            return <>
+                                                <Heading depth={depth} id={id}>
+                                                    <Keyword tkn={item.data.kind}/>
+                                                    <Ref item={item} onPage/>
+                                                </Heading>
+                                                <div style="display:flex;flex-flow:row nowrap;gap:1ch;align-items:center;">
+                                                    <ScopeBlock delim="paren" horizontal>
+                                                        <table class="parameter-list">{
+                                                            item.data.parameters!.map(async (ref) => {
+                                                                const param = await getEntry(ref);
+                                                                return <tr>
+                                                                    <td><Ref item={param} onPage/><Punc ch=":"/></td>
+                                                                    <td><TypeUnion list={param.data.typeUnion!} onPage/><Punc ch=","/></td>
+                                                                </tr>
+                                                            }
+                                                        )}</table>
+                                                    </ScopeBlock>
+                                                    <span class="keyword">&rArr;</span>
+                                                    <ScopeBlock delim="brace" horizontal>
+                                                        <table class="parameter-list">
+                                                        {Object.entries(item.data.returns!).map(([ret, typeUnion]) => <tr>
+                                                            <td><span class="return">{ret}</span><Punc ch=":"/></td>
+                                                            <td><TypeUnion list={typeUnion} onPage/><Punc ch=","/></td>
+                                                        </tr>)}
+                                                        </table>
+                                                    </ScopeBlock>
+                                                </div>
+                                            </>;
+
+                                        case 'field':
+                                            return <>
+                                                <Heading depth={depth} id={id}>
+                                                    <Keyword tkn={item.data.kind}/>
+                                                    <Ref item={item} onPage/><Punc ch=":"/>
+                                                    <TypeUnion list={item.data.typeUnion!} onPage/><Punc ch=";"/>
+                                                </Heading>
+                                            </>;
+
+                                        case 'parameter':
+                                            return <>
+                                                <Heading depth={depth} id={id}>
+                                                    <Keyword tkn={item.data.kind}/>
+                                                    <span class="type">&lbrace;</span>
+                                                    <TypeUnion list={item.data.typeUnion!} onPage/>
+                                                    <span class="type">&rbrace;</span>
+                                                    <Ref item={item} onPage/>
+                                                </Heading>
+                                            </>;
+
+                                        case 'type':
+                                        case 'trait':
+                                            return <>
+                                                <Heading depth={depth} id={id}>
+                                                    <Keyword tkn={item.data.kind}/>
+                                                    <Ref item={item} onPage/>
+                                                </Heading>
+                                            </>;
+
+                                        default:
+                                            return <>
+                                                <Heading depth={depth} id={id}>
+                                                    <Keyword tkn={item.data.kind}/>
+                                                    <Ref item={item} onPage/>
+                                                </Heading>
+                                            </>;
+                                    }
+                                }}
                         </Fragment>
 
                         {/* Aliases */}
                         {item.data.aliases && <>
-                            <Heading depth={depth + 1}><Comment>Aliases</Comment></Heading>
+                            <Heading depth={innerDepth}><Comment>Aliases</Comment></Heading>
                             <table class="alias-list">{
                                 Object.entries(item.data.aliases).map(([alias, kind]) => <tr>
                                     <td><Keyword tkn="static"/> <Keyword tkn={kind}/></td>
-                                    <td>&nbsp;<Ref item={item} overrideKind={kind}>{alias}</Ref></td>
-                                    <td>&nbsp;<Punc ch={kind === item.data.kind ? '=' : '~'}/>&nbsp;<Ref item={item}/><Punc ch=";"/></td>
+                                    <td>&nbsp;<Ref item={item} overrideKind={kind} onPage alias>{alias}</Ref></td>
+                                    <td>&nbsp;<Punc ch={kind === item.data.kind ? '=' : '~'}/>&nbsp;<Ref item={item} onPage/><Punc ch=";"/></td>
                                 </tr>)
                             }</table>
                         </>}
 
                         {/* Description */}
-                        <Heading depth={depth + 1}><Comment>Description</Comment></Heading>
-                        <div class="item-description" style="margin-bottom: 1em">
+                        <Heading depth={innerDepth}><Comment>Description</Comment></Heading>
+                        <div class="item-description">
                             <Description/>
                         </div>
 
                         {/* Children */}
-                        {renderedChildren.map(([kind, children]) => <>
-                            <Heading depth={depth + 1}><Comment>{properCase(kind)}</Comment></Heading>
-                            {children}
+                        {renderedChildren.map(([kind, childrenOfKind]) => <>
+                            <Heading depth={innerDepth}><Comment>{properCase(kind)}</Comment></Heading>
+                            {childrenOfKind}
                         </>)}
                     </ScopeBlock>
                 </>
             });
         }
-        return renderTree(tree, 1);
+        return tree.map((module) => <div class="module-column">{renderTree([module], 1)}</div>);
     }}
+    </main>
 </PageBase>
