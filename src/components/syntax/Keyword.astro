@@ -18,6 +18,7 @@ const validKeywords = [
     'similar to',
     'end of statement',
     'separator',
+    'combine traits',
 ];
 
 export type ValidKeyword = (typeof validKeywords)[number];
@@ -76,6 +77,11 @@ const tokenData: Record<ValidKeyword, { symbol: any, description: string, keywor
     'type intersection': {
         symbol: '&and;',
         description: 'produces an intersection of types (type a <em>and</em> type b)',
+        keywordType: 'punctuation',
+    },
+    'combine traits': {
+        symbol: '+',
+        description: 'combines multiple traits to be implemented (trait a <em>and</em> trait b)',
         keywordType: 'punctuation',
     },
     'function': {

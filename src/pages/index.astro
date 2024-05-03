@@ -1,17 +1,17 @@
 ---
 import { getCollection } from "astro:content";
 import PageBase from "../layouts/PageBase.astro";
-import { kinds, type GlossaryEntry, type Kind, type ValidGlossarySlug, getChildren, getParent } from "../scripts/glossary";
+import { kinds, type GlossaryEntry, type Kind, getChildren, getParent } from "../scripts/glossary";
 import ScopeBlock from "../components/ScopeBlock.astro";
 import Ref from "../components/Ref.astro";
 import Keyword from "../components/syntax/Keyword.astro";
 import Comment from "../components/syntax/Comment.astro";
-import Heading from "../components/Heading.astro";
 import TypeUnion from "../components/TypeUnion.astro";
-import ScopeInline from "../components/ScopeInline.astro";
-import Tooltip from "../components/Tooltip.astro";
 import LilRef from "../components/LilRef.astro";
 import RefPath from "../components/RefPath.astro";
+import { getEntry } from "astro:content";
+import { getEntries } from "astro:content";
+import Join from "../components/Join.astro";
 
 interface GlossaryTreeNode {
     item: GlossaryEntry;
@@ -57,7 +57,7 @@ const debugTreeRecursively = (nodes: GlossaryTreeNode[]) => {
         console.groupEnd();
     });
 }
-debugTreeRecursively(tree);
+// debugTreeRecursively(tree);
 ---
 
 <!-- <Katex tex={`{\\color{deepskyblue}{f}} ({\\color{lightgreen}{${anim('x', 'y', 'z')}}}) = 2{\\color{tomato}{${anim('x', 'y', 'z', 'w')}}}`}/> -->
@@ -88,6 +88,12 @@ debugTreeRecursively(tree);
             });
         </script>
     </Fragment>
+    <Join list={['apple', 'orange', 'banana', 'mango']}>
+        {(item: string, _index: number, _list: string[], _isFinal: boolean) => item}
+        <span slot="separator">
+            {(_item: string, _sepIndex: number, _list: string[], _prevItem: string, isFinal: boolean) => isFinal ? ' and ' : ', '}
+        </span>
+    </Join>
     <main>
     {() => {
         const renderTree = async (nodes: GlossaryTreeNode[], depth: number) => {
@@ -109,99 +115,102 @@ debugTreeRecursively(tree);
 
                                     const aliasRefs = item.data.aliases &&
                                         Object.entries(item.data.aliases).map(([alias, aliasKind]) =>
-                                            <LilRef item={item} overrideKind={aliasKind} onPage>
+                                            <LilRef item={item} overrideKind={aliasKind}>
                                                 {alias}
                                             </LilRef>
                                         );
 
-                                    const comment =
+                                    const info = await (async () => {
+                                        switch (item.data.kind) {
+                                            // Methods
+                                            case 'function':
+                                                const parameters =
+                                                    await getChildren(item.slug, (child) => child.data.kind === 'parameter');
+
+                                                const returns =
+                                                    await getChildren(item.slug, (child) => child.data.kind === 'return');
+
+                                                const ioList = (delim: 'paren' | 'brace', source: GlossaryEntry[]) =>
+                                                    <ScopeBlock delim={delim} horizontal>
+                                                        <table class="parameter-list">{
+                                                            source.map((srcItem) => <tr>
+                                                                <td><Ref item={srcItem}/><Keyword tkn="type annotation"/></td>
+                                                                <td><TypeUnion list={srcItem.data.typeUnion!}/><Keyword tkn="separator"/></td>
+                                                            </tr>
+                                                        )}</table>
+                                                    </ScopeBlock>;
+
+                                                return <>
+                                                    <Keyword tkn={item.data.kind}/>
+                                                    <Ref item={item}/>
+                                                    <div class="function-signature">
+                                                        {ioList('paren', parameters)}
+                                                        <span style="font-size:2em">
+                                                            <Keyword tkn="becomes"/>
+                                                        </span>
+                                                        {ioList('brace', returns)}
+                                                        <span style="font-size:2em">
+                                                            <Keyword tkn="implies"/>
+                                                        </span>
+                                                    </div>
+                                                </>;
+
+                                            // Fields
+                                            case 'field':
+                                                return <>
+                                                    <Keyword tkn={item.data.kind}/>
+                                                    <Ref item={item}/><Keyword tkn="type annotation"/>
+                                                    <TypeUnion list={item.data.typeUnion!}/><Keyword tkn="end of statement"/>
+                                                </>;
+
+                                            // Parameters and Returns
+                                            case 'parameter':
+                                            case 'return':
+                                                return <>
+                                                    <Keyword tkn={item.data.kind}/>
+                                                    <span class="type">&lbrace;</span>
+                                                    <TypeUnion list={item.data.typeUnion!}/>
+                                                    <span class="type">&rbrace;</span>
+                                                    <Ref item={item}/>
+                                                </>;
+
+                                            // Types and Traits
+                                            case 'type':
+                                            case 'trait':
+                                                const traits = item.data.traits && await getEntries(item.data.traits);
+                                                return <>
+                                                    <Keyword tkn={item.data.kind}/>
+                                                    <Ref item={item}/>
+                                                    {item.data.traits && <>
+                                                        <Keyword tkn="implements"/>
+                                                        {traits && <>
+                                                            <LilRef item={traits[0]}/>{traits.slice(1).map((trait) => {
+                                                                return <>&nbsp;<Keyword tkn="combine traits"/> <LilRef item={trait}/></>;
+                                                            })}
+                                                        </>}
+                                                    </>}
+                                                </>;
+
+                                            // Default
+                                            default:
+                                                return <>
+                                                    <Keyword tkn={item.data.kind}/>
+                                                    <Ref item={item}/>
+                                                </>;
+                                        }
+                                    })();
+
+                                    return <>
                                         <Comment hDepth={depth} id={id}>
-                                            The "<LilRef item={item} onPage/>" {item.data.kind}
+                                            The "<LilRef item={item}/>" {item.data.kind}
                                             <Fragment slot="tooltip">
-                                                The {item.data.kind} by the name of "<LilRef item={item} onPage/>"
+                                                The {item.data.kind} by the name of "<LilRef item={item}/>"
                                                     {aliasRefs && <>(aka {aliasRefs[0]}{aliasRefs.slice(1).map((ref) => <>, {ref}</>)})</>}<br/>
-                                                {parentItem && <>associated with the <RefPath item={parentItem} onPage/> {parentItem.data.kind}</>}
+                                                {parentItem && <>associated with the <RefPath item={parentItem}/> {parentItem.data.kind}</>}
                                             </Fragment>
-                                        </Comment>;
-
-                                    switch (item.data.kind) {
-                                        // Methods
-                                        case 'function':
-                                            const parameters =
-                                                await getChildren(item.slug, (child) => child.data.kind === 'parameter');
-
-                                            const returns =
-                                                await getChildren(item.slug, (child) => child.data.kind === 'return');
-
-                                            const ioList = (delim: 'paren' | 'brace', source: GlossaryEntry[]) =>
-                                                <ScopeBlock delim={delim} horizontal>
-                                                    <table class="parameter-list">{
-                                                        source.map((srcItem) => <tr>
-                                                            <td><Ref item={srcItem} onPage/><Keyword tkn="type annotation"/></td>
-                                                            <td><TypeUnion list={srcItem.data.typeUnion!} onPage/><Keyword tkn="separator"/></td>
-                                                        </tr>
-                                                    )}</table>
-                                                </ScopeBlock>;
-
-                                            return <>
-                                                {comment}
-                                                {item.data.isStatic && <><Keyword tkn="static"/>&nbsp;</>}
-                                                <Keyword tkn={item.data.kind}/>
-                                                <Ref item={item} onPage/>
-                                                <div class="function-signature">
-                                                    {ioList('paren', parameters)}
-                                                    <span style="font-size:2em">
-                                                        <Keyword tkn="becomes"/>
-                                                    </span>
-                                                    {ioList('brace', returns)}
-                                                    <span style="font-size:2em">
-                                                        <Keyword tkn="implies"/>
-                                                    </span>
-                                                </div>
-                                            </>;
-
-                                        // Fields
-                                        case 'field':
-                                            return <>
-                                                {comment}
-                                                {item.data.isStatic && <><Keyword tkn="static"/>&nbsp;</>}
-                                                <Keyword tkn={item.data.kind}/>
-                                                <Ref item={item} onPage/><Keyword tkn="type annotation"/>
-                                                <TypeUnion list={item.data.typeUnion!} onPage/><Keyword tkn="end of statement"/>
-                                            </>;
-
-                                        // Parameters and Returns
-                                        case 'parameter':
-                                        case 'return':
-                                            return <>
-                                                {comment}
-                                                {item.data.isStatic && <><Keyword tkn="static"/>&nbsp;</>}
-                                                <Keyword tkn={item.data.kind}/>
-                                                <span class="type">&lbrace;</span>
-                                                <TypeUnion list={item.data.typeUnion!} onPage/>
-                                                <span class="type">&rbrace;</span>
-                                                <Ref item={item} onPage/>
-                                            </>;
-
-                                        // Types and Traits
-                                        case 'type':
-                                        case 'trait':
-                                            return <>
-                                                {comment}
-                                                {item.data.isStatic && <><Keyword tkn="static"/>&nbsp;</>}
-                                                <Keyword tkn={item.data.kind}/>
-                                                <Ref item={item} onPage/>
-                                            </>;
-
-                                        // Default
-                                        default:
-                                            return <>
-                                                {comment}
-                                                {item.data.isStatic && <><Keyword tkn="static"/>&nbsp;</>}
-                                                <Keyword tkn={item.data.kind}/>
-                                                <Ref item={item} onPage/>
-                                            </>;
-                                    }
+                                        </Comment>
+                                        {item.data.isStatic && <Keyword tkn="static"/>} {info}
+                                    </>
                                 }}
                         </Fragment>
 
@@ -210,14 +219,23 @@ debugTreeRecursively(tree);
                             <Comment hDepth={innerDepth}>
                                 Aliases
                                 <Fragment slot="tooltip">
-                                    Other names <LilRef item={item} onPage/> may go by
+                                    Other names <LilRef item={item}/> may go by
                                 </Fragment>
                             </Comment>
                             <table class="alias-list">{
                                 Object.entries(item.data.aliases).map(([alias, kind]) => <tr>
-                                    <td><Keyword tkn="static"/> <Keyword tkn={kind}/></td>
-                                    <td>&nbsp;<Ref item={item} overrideKind={kind} onPage alias>{alias}</Ref></td>
-                                    <td>&nbsp;<Keyword tkn={kind === item.data.kind ? 'assign' : 'similar to'}/>&nbsp;<Ref item={item} onPage/><Keyword tkn="end of statement"/></td>
+                                    <td>
+                                        {/* All aliases are static */}
+                                        <Keyword tkn="static"/>
+                                        <Keyword tkn={kind}/>
+                                    </td>
+                                    <td>
+                                        &nbsp;<Ref item={item} overrideKind={kind} alias>{alias}</Ref>
+                                    </td>
+                                    <td>
+                                        &nbsp;<Keyword tkn={kind === item.data.kind ? 'assign' : 'similar to'}/>
+                                        <Ref item={item}/><Keyword tkn="end of statement"/>
+                                    </td>
                                 </tr>)
                             }</table>
                         </>}
@@ -226,7 +244,7 @@ debugTreeRecursively(tree);
                         <Comment hDepth={innerDepth}>
                             Description
                             <Fragment slot="tooltip">
-                                Description of the <LilRef item={item} onPage/> {item.data.kind}
+                                Description of the <LilRef item={item}/> {item.data.kind}
                             </Fragment>
                         </Comment>
                         <div class="item-description">
@@ -275,7 +293,7 @@ debugTreeRecursively(tree);
                                 <Comment hDepth={innerDepth}>
                                     {text}
                                     <Fragment slot="tooltip">
-                                        {desc} the <LilRef item={item} onPage/> {item.data.kind}
+                                        {desc} the <LilRef item={item}/> {item.data.kind}
                                     </Fragment>
                                 </Comment>
                                 {childrenOfKind}

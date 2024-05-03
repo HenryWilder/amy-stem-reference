@@ -1,0 +1,36 @@
+---
+interface Props {
+    list: any[];
+}
+
+const { list } = Astro.props;
+
+if (!Astro.slots.has('default')) {
+    throw new Error(`Default slot is required for 'Join' component`);
+}
+---
+
+{list.map(async (item, index) => {
+    /// Template
+
+    const isFinal = index === list.length - 1;
+    const prevIndex = index - 1;
+    const prevItem = index > 0 ? list[prevIndex] : undefined;
+
+    const template = await Astro.slots.render('default', [item, index, list, isFinal]);
+    // console.debug('template is:', template);
+
+    /// Separator
+
+    const sepIndex = prevIndex;
+
+    const separator = Astro.slots.has('separator') && prevItem
+        ? await Astro.slots.render('separator', [item, sepIndex, list, prevItem, isFinal])
+        : undefined;
+
+    // if (separator) console.debug('separator is:', separator);
+
+    // console.log('item', index, `(${isFinal ? 'the' : 'not the'} final item)`, 'is', item);
+
+    return <Fragment>{separator}{template}</Fragment>;
+})}
