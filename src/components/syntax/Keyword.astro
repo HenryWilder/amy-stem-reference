@@ -1,6 +1,26 @@
 ---
-import { type ValidKeyword } from '../../scripts/syntax';
+import { kinds } from '../../scripts/glossary';
 import Tooltip from '../Tooltip.astro';
+
+const validKeywords = [
+    ...kinds,
+    'null',
+    'becomes',
+    'maps to',
+    'implies',
+    'type annotation',
+    'type union',
+    'type intersection',
+    'static',
+    'extends',
+    'implements',
+    'assign',
+    'similar to',
+];
+
+export type ValidKeyword = (typeof validKeywords)[number];
+
+export const isValidKeyword = (x: any): x is ValidKeyword => validKeywords.map((kw) => kw as string).includes(x);
 
 interface Props {
     tkn: ValidKeyword;
@@ -8,32 +28,102 @@ interface Props {
 
 const { tkn } = Astro.props;
 
-const tokenData: Record<ValidKeyword, [string, string]> = {
-    '->': ['&rightarrow;', 'becomes'],
-    '=>': ['&Implies;', 'implies'],
-    'function': ['fn', 'takes parameters and produces a result'],
-    'module': ['mod', 'an entire area of a study'],
-    'field': ['pub', 'a part of an object'],
-    'parameter': ['@param', 'an input to a function'],
-    'implements': ['impl', 'the object follows the template of this trait'],
-    'extends': ['extends', 'the object builds upon the template of this type'],
-    'null': ['null', 'nothing'],
-    'static': ['static', 'external to the object possessing it'],
-    'type': ['type', 'an object\'s structure'],
-    'trait': ['trait', 'a template or guide for the basis of a type'],
+const tokenData: Record<ValidKeyword, { symbol: any, description: string, keywordType?: 'control' | 'punctuation' }> = {
+    'assign': {
+        symbol: '=',
+        description: 'the preceding item is equal to the following item',
+        keywordType: 'punctuation',
+    },
+    'similar to': {
+        symbol: '~',
+        description: 'the preceding item is similar to the following item',
+        keywordType: 'punctuation',
+    },
+    'becomes': {
+        symbol: '&rarr;',
+        description: 'the preceding item becomes the following item',
+    },
+    'maps to': {
+        symbol: '&mapsto;',
+        description: 'the preceding item maps to the following item',
+    },
+    'implies': {
+        symbol: '&rArr;',
+        description: 'the preceding item implies the following item',
+    },
+    'type annotation': {
+        symbol: ':',
+        description: 'shows that the preceding item is of the type described by the following item',
+        keywordType: 'punctuation',
+    },
+    'type union': {
+        symbol: '&or;',
+        description: 'produces a union of types (type a <em>or</em> type b)',
+        keywordType: 'punctuation',
+    },
+    'type intersection': {
+        symbol: '&and;',
+        description: 'produces an intersection of types (type a <em>and</em> type b)',
+        keywordType: 'punctuation',
+    },
+    'function': {
+        symbol: 'fn',
+        description: 'takes parameters and produces a result',
+    },
+    'module': {
+        symbol: 'mod',
+        description: 'an entire area of a study',
+    },
+    'field': {
+        symbol: 'pub',
+        description: 'a part of an object',
+    },
+    'parameter': {
+        symbol: '@param',
+        description: 'an input to a function',
+    },
+    'return': {
+        symbol: '@return',
+        description: 'an output of a function',
+    },
+    'implements': {
+        symbol: 'impl',
+        description: 'the object follows the template of this trait',
+    },
+    'extends': {
+        symbol: 'extends',
+        description: 'the object builds upon the template of this type',
+    },
+    'null': {
+        symbol: 'null',
+        description: 'nothing',
+    },
+    'static': {
+        symbol: 'static',
+        description: 'external to the object possessing it OR an unchanging property',
+    },
+    'type': {
+        symbol: 'type',
+        description: 'an object\'s structure',
+    },
+    'trait': {
+        symbol: 'trait',
+        description: 'a template or guide for the basis of a type',
+    },
+    'constant': {
+        symbol: 'const',
+        description: 'an unchanging value',
+    },
 };
 
-const [symbol, description] = tokenData[tkn];
-
-const isControl = ([] as ValidKeyword[]).includes(tkn);
-const classList = ["keyword", isControl ? 'control' : undefined];
+const { symbol, description, keywordType } = tokenData[tkn];
 ---
 
 <Tooltip>
-    <span class:list={classList} set:html={symbol}></span>
+    <span class:list={['keyword', keywordType]} set:html={symbol}></span>
     <Fragment slot="content">
-        <p class:list={classList}>'{tkn}' keyword</p>
-        <p>{description}</p>
+        <p class:list={['keyword', keywordType]}>'{tkn}' {keywordType} keyword</p>
+        <p set:html={description}></p>
     </Fragment>
 </Tooltip>
 

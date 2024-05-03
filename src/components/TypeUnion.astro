@@ -2,7 +2,8 @@
 import { getEntries } from 'astro:content';
 import { type GlossaryRef } from '../scripts/glossary';
 import Ref from './Ref.astro';
-import Punc from './syntax/Punc.astro';
+import Keyword from './syntax/Keyword.astro';
+import ScopeInline from './ScopeInline.astro';
 
 interface Props {
     list: GlossaryRef[];
@@ -13,4 +14,9 @@ const { list, onPage } = Astro.props;
 const types = await getEntries(list);
 ---
 
-<Ref item={types[0]} onPage={onPage}/>{types.slice(1).map((ty) => <><Punc ch=" | "/><Ref item={ty} onPage={onPage}/></>)}
+{() => {
+    const inner = <><Ref item={types[0]} onPage={onPage}/>{types.slice(1).map((ty) => <>&nbsp;<Keyword tkn="type union"/>&nbsp;<Ref item={ty} onPage={onPage}/></>)}</>;
+    return list.length > 1
+        ? <ScopeInline delim="()">{inner}</ScopeInline>
+        : inner;
+}}

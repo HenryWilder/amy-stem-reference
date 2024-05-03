@@ -1,9 +1,15 @@
 ---
 interface Props {
-    ch: string;
+    ch?: string;
 }
 
 const { ch } = Astro.props;
+
+if (ch === undefined && !Astro.slots.has('default')) {
+    throw new Error(`Punc must have either a slot or a ch`);
+} else if (ch !== undefined && Astro.slots.has('default')) {
+    throw new Error(`Punc cannot have both a slot and a ch`);
+}
 ---
 
-<span class="punctuation">{ch}</span>
+<span class="punctuation"><slot>{ch}</slot></span>

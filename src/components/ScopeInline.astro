@@ -10,4 +10,28 @@ if (typeof delim === 'string' && delim.length !== 2) {
 }
 ---
 
-<span class="scope inline"><span class="scope-delimiter">{delim[0]}</span><slot></slot><span class="scope-delimiter">{delim[1]}</span></span>
+<!-- By keeping the style in the component definition, each instance of the component should get its own independent effect,
+     meaning we don't have to be concerned about nearly as many edge cases -->
+<style>
+    /* the one being hovered */
+    .scope-delimiter:hover,
+    /* opening when closing is being hovered */
+    .scope-delimiter:has(~ .scope-delimiter:hover),
+    /* closing when opening is being hovered */
+    .scope-delimiter:hover ~ .scope-delimiter {
+        outline: 1px solid gray;
+    }
+
+    .scope.inline:has(> .scope-delimiter:hover) {
+        border-left: 1px solid var(--scope-color);
+        margin-left: -1px;
+        border-bottom: 1px solid var(--scope-color);
+        margin-bottom: -1px;
+    }
+</style>
+
+<span class="scope inline"
+    ><span class="scope-delimiter">{delim[0]}</span
+    ><span class="scope-inner"><slot></slot></span
+    ><span class="scope-delimiter">{delim[1]}</span
+></span>

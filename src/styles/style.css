@@ -180,8 +180,8 @@ table.parameter-list {
 
     &.vertical {
         & > .block {
-            /* border-inline: 1px solid color-mix(in srgb, var(--scope-color) 30%, transparent); */
-            border-inline-width: 0;
+            border-inline: 1px solid color-mix(in srgb, var(--scope-color) 30%, transparent);
+            /* border-inline-width: 0; */
         }
 
         &.brace-scope-container > .block {
@@ -205,8 +205,8 @@ table.parameter-list {
 
     &.horizontal {
         & > .block {
-            /* border-block: 1px solid color-mix(in srgb, var(--scope-color) 30%, transparent); */
-            border-block-width: 0;
+            border-block: 1px solid color-mix(in srgb, var(--scope-color) 30%, transparent);
+            /* border-block-width: 0; */
         }
 
         &.brace-scope-container > .block {
@@ -262,20 +262,24 @@ table.parameter-list {
 .vertical.brace-scope-container > .brace-spike {
     &:first-of-type {
         border-bottom-color: var(--scope-color);
+        margin-top: -0.5em;
     }
 
     &:last-of-type {
         border-top-color: var(--scope-color);
+        margin-bottom: -0.5em;
     }
 }
 
 .horizontal.brace-scope-container > .brace-spike {
     &:first-of-type {
         border-right-color: var(--scope-color);
+        margin-left: -0.5em;
     }
 
     &:last-of-type {
         border-left-color: var(--scope-color);
+        margin-right: -0.5em;
     }
 }
 
@@ -287,4 +291,11 @@ table.parameter-list {
     li:not(:last-child) {
         margin-bottom: 1em;
     }
+}
+
+.function-signature {
+    display: inline-flex;
+    flex-flow: row nowrap;
+    gap: 1ch;
+    align-items: center;
 }
