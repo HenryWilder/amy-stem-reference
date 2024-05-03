@@ -1,11 +1,31 @@
 ---
-
+import ScopeInline from "./ScopeInline.astro";
 ---
 
-<div class="scope brace-scope-container">
-    <span class="brace-spike"></span>
-    <div class="block">
-        <slot></slot>
+<style>
+    details:not(:last-child) {
+        margin-bottom: 1em;
+    }
+    details > summary {
+        list-style-position: outside;
+        .hide-when-open {
+            color: gray;
+        }
+    }
+    details[open] > summary .hide-when-open {
+        display: none;
+    }
+</style>
+
+<details open>
+    <summary>
+        <slot name="summary"></slot><span class="hide-when-open"> <ScopeInline delim="{}">...</ScopeInline></span>
+    </summary>
+    <div class="scope brace-scope-container">
+        <span class="brace-spike"></span>
+        <div class="block">
+            <slot></slot>
+        </div>
+        <span class="brace-spike"></span>
     </div>
-    <span class="brace-spike"></span>
-</div>
+</details>

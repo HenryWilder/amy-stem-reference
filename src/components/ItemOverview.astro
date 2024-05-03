@@ -11,10 +11,11 @@ interface Props {
 }
 
 const { item } = Astro.props;
+const kind = item.data.kind;
 ---
 
 {() => {
-    switch (item.data.kind) {
+    switch (kind) {
         case "function":  return <Method item={item}/>;
         case "type": return <Type item={item}/>;
         case "field": return <Field item={item} symbol="todo"/>;

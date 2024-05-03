@@ -7,17 +7,19 @@ import Tooltip from './Tooltip.astro';
 export interface Props {
     item: GlossaryEntry;
     overrideKind?: Kind;
+    /** If true: treats slug as id rather than path */
+    onPage?: true;
 }
 
-const { item, overrideKind = item.data.kind } = Astro.props;
+const { item, overrideKind = item.data.kind, onPage } = Astro.props;
 if (item === undefined) throw new Error(`Cannot reference undefined`);
 const defaultName = item.slug.split('/').at(-1);
 ---
 
 <Tooltip>
-    <LilRef item={item} overrideKind={overrideKind}><slot>{defaultName}</slot></LilRef>
+    <LilRef item={item} overrideKind={overrideKind} onPage={onPage}><slot>{defaultName}</slot></LilRef>
     <Fragment slot="content">
-        <RefPath item={item}/>
+        <RefPath item={item} onPage={onPage}/>
         <p>{item.data.brief}</p>
     </Fragment>
 </Tooltip>

@@ -11,9 +11,11 @@ import Punc from './syntax/Punc.astro';
 export interface Props {
     item: GlossaryEntry;
     tooltips?: true;
+    /** If true: treats slug as id rather than path */
+    onPage?: true;
 }
 
-const { item, tooltips } = Astro.props;
+const { item, tooltips, onPage } = Astro.props;
 
 const slugs = item.slug.split('/').map((_, index, list) => list.slice(0, index + 1).join('/') as ValidContentEntrySlug<'glossary'>);
 // console.log(slugs);
@@ -28,6 +30,6 @@ const connector: ('@' | '::')[] = path.slice(1).map(({ data: { kind } }) => {
 });
 ---
 
-{tooltips ? <Ref item={path[0]}/> : <LilRef item={path[0]}/>}{path.slice(1).map((part, index) =>
-    <><Punc ch={connector[index]}/>{tooltips ? <Ref item={part}/> : <LilRef item={part}/>}</>
+{tooltips ? <Ref item={path[0]} onPage={onPage}/> : <LilRef item={path[0]} onPage={onPage}/>}{path.slice(1).map((part, index) =>
+    <><Punc ch={connector[index]}/>{tooltips ? <Ref item={part} onPage={onPage}/> : <LilRef item={part} onPage={onPage}/>}</>
 )}

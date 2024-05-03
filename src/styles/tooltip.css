@@ -16,7 +16,7 @@
 
         /* Show the tooltip text when you mouse over the tooltip container */
         .tooltiptext {
-            display: inline;
+            visibility: visible;
             opacity: 100%;
             transition: 100ms 360ms;
         }
@@ -39,7 +39,7 @@
     font-weight: normal;
     /* font-family: serif; */
     opacity: 0;
-    display: none;
+    visibility: hidden;
     width: max-content;
     background-color: var(--background-main);
     border: 1px solid #3a3a3a;

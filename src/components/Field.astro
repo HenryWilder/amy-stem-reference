@@ -19,6 +19,6 @@ if (item.data.kind !== 'field' && item.data.kind !== 'parameter') {
 }
 ---
 
-<h3><Comment><Katex tex={symbol}></Comment> in <a href="#notation">notation</a></h3>
-<Comment>{item.data.brief}</Comment><br/>
+<!-- <h3><Comment><Katex tex={symbol}> in <a href="#notation">notation</a></Comment></h3> -->
+<!-- <Comment>{item.data.brief}</Comment><br/> -->
 <Ref item={item}/><Punc ch=":"/> <TypeUnion list={item.data.typeUnion!}/><Punc ch=";"/>

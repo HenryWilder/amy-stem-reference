@@ -3,7 +3,6 @@ import { getCollection } from 'astro:content';
 import ModuleOverview from '../components/ModuleOverview.astro';
 import Comment from '../components/syntax/Comment.astro';
 import GlossaryPage from '../layouts/GlossaryPage.astro';
-import type { CollectionEntry } from 'astro:content';
 
 const modules = await getCollection('glossary', (entry) => entry.data.kind === 'module');
 ---

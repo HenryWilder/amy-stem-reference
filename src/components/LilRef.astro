@@ -4,9 +4,11 @@ import { type GlossaryEntry, type Kind } from '../scripts/glossary';
 interface Props {
     item: GlossaryEntry;
     overrideKind?: Kind;
+    /** If true: treats slug as id rather than path */
+    onPage?: true;
 }
 
-const { item, overrideKind = item.data.kind } = Astro.props;
+const { item, overrideKind = item.data.kind, onPage } = Astro.props;
 ---
 
-<a href={'/' + item.slug} class={overrideKind}><slot>{item.slug.split('/').at(-1)!}</slot></a>
+<a href={onPage ? '#' + item.slug.replace(/\//g, '+') : '/' + item.slug } class={overrideKind}><slot>{item.slug.split('/').at(-1)!}</slot></a>
