@@ -1,14 +1,81 @@
 ---
 import katex from 'katex';
 import '../styles/animated-tex.css';
+import { getCollection } from 'astro:content';
+import type { GlossaryEntry } from '../scripts/glossary';
 
 interface Props {
     tex: string;
 }
 
 const { tex } = Astro.props;
+
+const animBox     = 'anim-box'     as const;
+const animElement = 'anim-element' as const;
+const tooltip     = 'tooltip'      as const;
+const tooltipText = 'tooltiptext'  as const;
+
+const macros = {
+    // #1 is content
+    "\\animBox": `\\htmlClass{${animBox}}{#1}`,
+
+    // #1 is content
+    "\\animElement": `\\htmlClass{${animElement}}{#1}`,
+
+    // #1 is content
+    // #2 is tooltip
+    "\\tooltip": `\\htmlClass{${tooltip}}{#1\\htmlClass{${tooltipText}}{#2}}`,
+
+    // #1 is kind
+    // #2 is content
+    "\\kind": `\\htmlClass{#1}{#2}`,
+
+    // {#1} is slug
+    // [#2] is content
+    // ---
+    // #1 is href
+    // #2 is kind
+    // #3 is content
+    // #4 is tooltip
+    "\\fullref": `\\tooltip{\\kind{#2}{\\href{#1}{#3}}}{#4}`,
+
+    // binary horizontal 'or'
+    "\\bhor": `\\;\\text{or}\\;`,
+
+    // quad horizontal 'or'
+    "\\qhor": `\\quad\\text{or}\\quad`,
+
+    // 1em vertical 'or'
+    "\\bvor": `\\[1em]\\text{or}\\[1em]`,
+
+    // 2em vertical 'or'
+    "\\qvor": `\\[2em]\\text{or}\\[2em]`,
+} as const;
+
+const rxRef = /\\ref\{(.*?)\}(?:\[(.*?)\])?/g;
+
+const allEntries = tex.match(rxRef) ? await getCollection('glossary') : undefined;
+
+const modifiedTex = tex.replace(rxRef, (_substring: string, slug: string, content: string | undefined) => {
+    // console.log(`found the \\ref '${_substring}'`); // debug
+    if (allEntries === undefined) {
+        throw new Error('allEntries must be defined if any \\ref macros exist');
+    }
+    const item: GlossaryEntry | undefined = allEntries.find((entry: GlossaryEntry) => entry.slug === slug);
+    if (item === undefined) {
+        throw new Error(`The slug '${slug}' could not be matched to a valid glossary entry`);
+    }
+    const href = '#' + item.slug.replace(/\//g, '+');
+    const kind = item.data.kind;
+    const tooltip = `\\text{${item.data.brief}}`;
+    const name = content ?? `\\text{${slug.split('/').at(-1)}}`;
+    const fullRef = `\\fullref{${href}}{${kind}}{${name}}{${tooltip}}`;
+    // console.log(`produced the \\fullref '${fullRef}'`); // debug
+    return fullRef;
+});
+// console.log(`the tex '${tex}' became '${modifiedTex}'`); // debug
 ---
 
-<Fragment set:html={katex.renderToString(tex, { trust: true })} />
+<Fragment set:html={katex.renderToString(modifiedTex, { trust: true, macros: macros, strict: 'ignore' })} />
 
 <script src="../../public/client-animated-tex.ts"></script>

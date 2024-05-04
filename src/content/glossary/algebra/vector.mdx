@@ -4,46 +4,48 @@ brief: hello world
 kind: type
 notation: '
 \htmlClass{type}{
-\begin{bmatrix}
-    {\htmlClass{anim-box}{
-        \htmlClass{anim-element}{\color{tomato}x}
-        \htmlClass{anim-element}{\htmlClass{field}{\text{c}}_{\color{tomato}1}}
-    }} \\
-    {\htmlClass{anim-box}{
-        \htmlClass{anim-element}{\color{lightgreen}y}
-        \htmlClass{anim-element}{\htmlClass{field}{\text{c}}_{\color{lightgreen}2}}
-    }} \\
-    {\htmlClass{anim-box}{
-        \htmlClass{anim-element}{\color{deepskyblue}z}
-        \htmlClass{anim-element}{\htmlClass{field}{\text{c}}_{\color{deepskyblue}3}}
-    }} \\
-    \htmlClass{field}\vdots \\
-    {\htmlClass{anim-box}{
-        \htmlClass{anim-element}{\color{gray}?}
-        \htmlClass{anim-element}{\htmlClass{field}{\text{c}}_{\color{gray}n}}
-    }}
-\end{bmatrix}
-\quad\text{or}\quad
-\begin{pmatrix}
-    {\htmlClass{anim-box}{
-        \htmlClass{anim-element}{\color{tomato}x}
-        \htmlClass{anim-element}{\htmlClass{field}{\text{c}}_{\color{tomato}1}}
-    }},
-    {\htmlClass{anim-box}{
-        \htmlClass{anim-element}{\color{lightgreen}y}
-        \htmlClass{anim-element}{\htmlClass{field}{\text{c}}_{\color{lightgreen}2}}
-    }},
-    {\htmlClass{anim-box}{
-        \htmlClass{anim-element}{\color{deepskyblue}z}
-        \htmlClass{anim-element}{\htmlClass{field}{\text{c}}_{\color{deepskyblue}3}}
-    }},
-    \htmlClass{field}\ldots,
-    {\htmlClass{anim-box}{
-        \htmlClass{anim-element}{\color{gray}?}
-        \htmlClass{anim-element}{\htmlClass{field}{\text{c}}_{\color{gray}n}}
-    }}
-\end{pmatrix}
-}'
+    \begin{bmatrix}
+        \animBox{
+            \animElement{\color{tomato}x}
+            \animElement{\htmlClass{field}{\text{c}}_{\color{tomato}1}}
+        } \\
+        \animBox{
+            \animElement{\color{lightgreen}y}
+            \animElement{\htmlClass{field}{\text{c}}_{\color{lightgreen}2}}
+        } \\
+        \animBox{
+            \animElement{\color{deepskyblue}z}
+            \animElement{\htmlClass{field}{\text{c}}_{\color{deepskyblue}3}}
+        } \\
+        \htmlClass{field}{\vdots} \\
+        \animBox{
+            \animElement{\color{gray}?}
+            \animElement{\htmlClass{field}{\text{c}}_{\color{gray}n}}
+        }
+    \end{bmatrix}
+    \bhor
+    \begin{pmatrix}
+        \animBox{
+            \animElement{\ref{basic/scalar}[\color{tomato}x]}
+            \animElement{\htmlClass{field}{\text{c}}_{\color{tomato}1}}
+        },
+        \animBox{
+            \animElement{\color{lightgreen}y}
+            \animElement{\htmlClass{field}{\text{c}}_{\color{lightgreen}2}}
+        },
+        \animBox{
+            \animElement{\color{deepskyblue}z}
+            \animElement{\htmlClass{field}{\text{c}}_{\color{deepskyblue}3}}
+        },
+        \htmlClass{field}{\ldots},
+        \animBox{
+            \animElement{\color{gray}?}
+            \animElement{\htmlClass{field}{\text{c}}_{\color{gray}n}}
+        }
+    \end{pmatrix}
+} \\[1em]
+\ref{basic/scalar}[\text{example ref}]
+'
 ---
 import Ref from '/./src/components/MdxRef.astro';
 

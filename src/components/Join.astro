@@ -46,7 +46,7 @@ if (!Astro.slots.has('default')) {
         ? await Promise.all(list.slice(1).map(async (item, index) => {
             const isFinal = index === list.length - 2;
 
-            console.log('index', index, 'prev', list[index], 'next', item);
+            // console.log('index', index, 'prev', list[index], 'next', item);
 
             const separator = await Astro.slots.render('separator', [
                 [
