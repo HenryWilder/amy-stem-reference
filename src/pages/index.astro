@@ -151,7 +151,7 @@ const debugTreeRecursively = (nodes: GlossaryTreeNode[]) => {
                                                         </Join>
                                                     </ScopeBlock>;
 
-                                                const implies = <ScopeInline delim="{}"><span style="color:gray">...</span></ScopeInline>;
+                                                // const implies = <ScopeInline delim="{}"><span style="color:gray">...</span></ScopeInline>;
 
                                                 return <>
                                                     <Keyword tkn={item.data.kind}/>
@@ -162,9 +162,9 @@ const debugTreeRecursively = (nodes: GlossaryTreeNode[]) => {
                                                             <Keyword tkn="becomes" prev={ioList('paren', parameters)} next={ioList('brace', returns)}/>
                                                         </span>
                                                         {ioList('brace', returns)}
-                                                        <span style="font-size:2em">
+                                                        {/* <span style="font-size:2em">
                                                             <Keyword tkn="implies" prev={ioList('brace', returns)} next={implies}/>
-                                                        </span>
+                                                        </span> */}
                                                     </div>
                                                 </>;
 
@@ -173,7 +173,7 @@ const debugTreeRecursively = (nodes: GlossaryTreeNode[]) => {
                                                 const field = <Ref item={item}/>;
                                                 const fieldType = <TypeUnion list={item.data.typeUnion!}/>;
                                                 return <>
-                                                    <Keyword tkn={item.data.kind}/>
+                                                    <Keyword tkn={item.data.kind} what={field}/>
                                                     {field}<Keyword tkn="type annotation" prev={field} next={fieldType}/>
                                                     {fieldType}<Keyword tkn="end of statement"/>
                                                 </>;
@@ -343,7 +343,9 @@ const debugTreeRecursively = (nodes: GlossaryTreeNode[]) => {
                                         {desc} the <LilRef item={item}/> {item.data.kind}.
                                     </Fragment>
                                 </Comment>
-                                {childrenOfKind}
+                                <div class="columns">
+                                    {childrenOfKind}
+                                </div>
                             </>
                         })}
                     </ScopeBlock>

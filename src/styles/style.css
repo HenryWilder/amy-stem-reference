@@ -251,13 +251,23 @@ table.parameter-list {
     display: inline;
 }
 
+.columns {
+    display: flex;
+    flex-flow: row nowrap;
+    /* todo: consider wrapping? */
+    align-items: flex-start;
+    gap: 4em;
+}
+
+/* syntax highlighting */
+
 .keyword {
     cursor: default;
     color: dodgerblue;
+}
 
-    &.control {
-        color: orchid;
-    }
+.control {
+    color: orchid;
 }
 
 .constant {
@@ -268,8 +278,6 @@ table.parameter-list {
     /* color: palegreen; */
     color: aquamarine;
 }
-
-/* syntax highlighting */
 
 .type {
     color: lightseagreen;

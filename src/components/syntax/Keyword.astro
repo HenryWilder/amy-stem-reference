@@ -1,5 +1,6 @@
 ---
 import { type Kind, kinds } from '../../scripts/glossary';
+import type { Conditional } from '../../scripts/utility';
 import Tooltip from '../Tooltip.astro';
 
 const validKeywords = [
@@ -24,11 +25,20 @@ const validKeywords = [
     'separator',
     'combine traits',
     'for',
+    'namespace',
 ] as const;
 
 type ValidKindSeparator = `${'static ' | 'instance ' | ''}${Kind} separator`; // instance if blank
 
 export type ValidKeyword = (typeof validKeywords)[number] | ValidKindSeparator;
+
+type NeedsSubject =
+    never;
+
+type AllowsSubject =
+    | 'static'
+    | 'instance'
+    | Kind;
 
 type NeedsContext =
     | 'implements'
@@ -45,20 +55,70 @@ type NeedsContext =
     | 'combine traits'
     | ValidKindSeparator;
 
+type AllowsContext =
+    | 'member'
+
 type Props = {
     fullName?: true;
 } & ({
-        tkn: Exclude<ValidKeyword, NeedsContext>;
-        prev?: undefined;
-        next? : undefined;
-    } | {
-        tkn: NeedsContext;
-        prev: any;
-        next: any;
-    }
-);
+    tkn: Exclude<ValidKeyword, NeedsContext | AllowsContext | AllowsSubject>;
+} | {
+    tkn: NeedsContext;
+    prev: any;
+    next: any;
+} | {
+    tkn: AllowsContext;
+    prev?: any;
+    next?: any;
+} | {
+    tkn: NeedsSubject;
+    what: any;
+} | {
+    tkn: AllowsSubject;
+    what?: any;
+});
 
-const { tkn, prev = 'ERR', next = 'ERR', fullName } = Astro.props;
+// // Should pass
+// const props1a: Props = {
+//     tkn: 'for',
+// }
+
+// // Should fail
+// const props1b: Props = {
+//     tkn: 'for',
+//     prev: 'apple',
+//     next: 'orange',
+//     what: 'banana',
+// }
+
+// // Should fail
+// const props2a: Props = {
+//     tkn: 'implements',
+// }
+
+// // Should pass
+// const props2b: Props = {
+//     tkn: 'implements',
+//     prev: 'apple',
+//     next: 'orange',
+// }
+
+// // Should pass (implies the subject is the concept)
+// const props3a: Props = {
+//     tkn: 'constant',
+// }
+
+// // Should pass
+// const props3b: Props = {
+//     tkn: 'constant',
+//     what: 'banana',
+// }
+
+const { tkn, fullName, ...rest } = Astro.props;
+
+const prev = 'prev' in rest ? rest.prev : undefined;
+const next = 'next' in rest ? rest.next : undefined;
+const what = 'what' in rest ? rest.what : undefined;
 
 type TokenData = { symbol: any, description: any, keywordType?: 'keyword' | 'control' | 'operator' };
 
@@ -72,6 +132,24 @@ if (fullName && Astro.slots.has('default')) {
 {() => {
     const tokenData: TokenData = (() => {
         switch (tkn) {
+            case 'namespace':
+                return {
+                    symbol: <>&forall;</>,
+                    description: [<>
+                        An abstract space for distinguishing identical names.
+                    </>, <>&nbsp;
+                    </>, <>
+                        <strong>Example:</strong>
+                    </>, <>
+                        <span class="type">bat</span>&nbsp;&ne;&nbsp;<span class="type">bat</span>
+                    </>, <>
+                        &because; Because
+                    </>, <>
+                        <span class="type">bat</span>&nbsp;=&nbsp;<span class="module">animal</span>::<span class="trait">mammal</span>::<span class="type">bat</span>&nbsp;&rArr; 🦇
+                    </>, <>
+                        <span class="type">bat</span>&nbsp;=&nbsp;<span class="module">sports</span>::<span class="function">baseball</span>::<span class="type">bat</span>&nbsp;&rArr; ⚾🏏
+                    </>],
+                };
             case 'for':
                 return {
                     symbol: <>&forall;</>,
@@ -176,14 +254,14 @@ if (fullName && Astro.slots.has('default')) {
                 return {
                     symbol: 'fn',
                     description: <>
-                        Takes input and produces output.
+                        {what ? <>{what}&nbsp;t</> : 'T'}akes input and produces output.
                     </>,
                 };
             case 'method':
                 return {
                     symbol: 'fn',
                     description: <>
-                        An&nbsp;<Astro.self fullName tkn="instance"/>&nbsp;<Astro.self fullName tkn="member"/>&nbsp;<Astro.self fullName tkn="function"
+                        {what ? <>{what}&nbsp;is a</>: 'A'}n&nbsp;<Astro.self fullName tkn="instance"/>&nbsp;<Astro.self fullName tkn="member"/>&nbsp;<Astro.self fullName tkn="function"
                         />&nbsp;of a&nbsp;<Astro.self fullName tkn="type"/>.
                     </>,
                 };
@@ -191,35 +269,35 @@ if (fullName && Astro.slots.has('default')) {
                 return {
                     symbol: 'mod',
                     description: <>
-                        An entire area of a study.
+                        {what ? <>{what}&nbsp;is a</>: 'A'}n entire area of a study.
                     </>,
                 };
             case 'field':
                 return {
                     symbol: 'pub',
                     description: <>
-                        A variable part of an object.
+                        {what ? <>{what}&nbsp;is a</>: 'A'} variable part of an object.
                     </>,
                 };
             case 'property':
                 return {
                     symbol: '@property',
                     description: <>
-                        A&nbsp;<Astro.self fullName tkn="field"/>-like&nbsp;<Astro.self fullName tkn="method"/>.
+                        {what ? <>{what}&nbsp;is a</> : 'A'}&nbsp;<Astro.self fullName tkn="field"/>-like&nbsp;<Astro.self fullName tkn="method"/>.
                     </>,
                 };
             case 'parameter':
                 return {
                     symbol: '@param',
                     description: <>
-                        An input to a&nbsp;<Astro.self fullName tkn="function"/>.
+                        {what ? <>{what}&nbsp;is a</> : 'A'}n input to a&nbsp;<Astro.self fullName tkn="function"/>.
                     </>,
                 };
             case 'return':
                 return {
                     symbol: '@return',
                     description: <>
-                        An output from a&nbsp;<Astro.self fullName tkn="function"/>.
+                        {what ? <>{what}&nbsp;is a</> : 'A'}n output from a&nbsp;<Astro.self fullName tkn="function"/>.
                     </>,
                 };
             case 'implements':
@@ -247,21 +325,21 @@ if (fullName && Astro.slots.has('default')) {
                 return {
                     symbol: 'static',
                     description: <>
-                        External to the object possessing it.
+                        {what ? <>{what}&nbsp;is e</> : 'E'}xternal to the object possessing it.
                     </>,
                 };
             case 'instance':
                 return {
                     symbol: 'instance',
                     description: <>
-                        Specific to an example or real world copy the object possessing it.
+                        {what ? <>{what}&nbsp;is s</> : 'S'}pecific to an example or real world copy the object possessing it.
                     </>,
                 };
             case 'member':
                 return {
                     symbol: 'member',
                     description: <>
-                        Belonging to another object or&nbsp;<Astro.self fullName tkn="module"/>.
+                        {prev ? <>{prev}&nbsp;belongs</> : 'Belonging'} to {next ? <>the&nbsp;{next}&nbsp;</> : 'another '} <Astro.self fullName tkn="namespace"/>.
                     </>,
                 };
             case 'type':
@@ -302,7 +380,7 @@ if (fullName && Astro.slots.has('default')) {
                         description: <>
                             {next}&nbsp;is&nbsp;{aOrAn
                             }&nbsp;<Astro.self fullName tkn={staticity}
-                            />&nbsp;<Astro.self fullName tkn="member"
+                            />&nbsp;<Astro.self fullName tkn="member" prev={next} next={prev}
                             />&nbsp;<Astro.self fullName tkn={kind}
                             />&nbsp;within&nbsp;{prev}.
                         </>,
