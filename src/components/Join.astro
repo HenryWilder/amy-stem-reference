@@ -1,17 +1,13 @@
 ---
-interface PropsRequired {
+type Props = {
     list?: any[];
     optional: true;
-}
-
-interface PropsOptional {
+} | {
     list: any[];
     optional?: false;
-}
+};
 
-type Props = PropsRequired | PropsOptional;
-
-const { list, optional = false } = Astro.props;
+const { list, optional } = Astro.props;
 
 // console.log('is optional?:', optional);
 
@@ -22,34 +18,60 @@ if (!Astro.slots.has('default')) {
 
 {async () => {
     if (list === undefined) {
-        return Astro.slots.has('if-undefined')
-            ? await Astro.slots.render('if-undefined')
-            : undefined;
+        if (optional) {
+            return Astro.slots.has('if-undefined')
+                ? await Astro.slots.render('if-undefined')
+                : undefined;
+        } else {
+            throw new Error(`'Join' component not marked as 'optional' has no provided 'list' property`);
+        }
     }
 
-    const inner = await Promise.all(list.map(async (item, index) => {
-        /// Template
-
+    /// Template
+    const items = await Promise.all(list.map(async (item, index) => {
         const isFinal = index === list.length - 1;
-        const prevIndex = index - 1;
 
-        const template = await Astro.slots.render('default', [item, index, list, isFinal]);
+        const template = await Astro.slots.render('default', [
+            item,    // Current item
+            isFinal, // Is this the final item in the list
+            index,   // The index of the item
+            list     // The entire list
+        ]);
         // console.debug('template is:', template);
 
-        /// Separator
-
-        const sepIndex = prevIndex;
-
-        const separator = Astro.slots.has('separator') && index > 0
-            ? await Astro.slots.render('separator', [item, sepIndex, list, list[prevIndex], isFinal])
-            : undefined;
-
-        // if (separator) console.debug('separator is:', separator);
-
-        // console.log('item', index, `(${isFinal ? 'the' : 'not the'} final item)`, 'is', item);
-
-        return <>{separator}{template}</>;
+        return <>{template}</>;
     }));
+
+    const separators = Astro.slots.has('separator')
+        ? await Promise.all(list.slice(1).map(async (item, index) => {
+            const isFinal = index === list.length - 2;
+
+            console.log('index', index, 'prev', list[index], 'next', item);
+
+            const separator = await Astro.slots.render('separator', [
+                [
+                    list[index], // The parameters to the previous item
+                    items[index] // The previous item
+                ],
+                [
+                    item,            // The parameters to the next item
+                    items[index + 1] // The next item
+                ],
+                isFinal,  // Is this the final item in the list
+                index, // The index of the separator
+                [
+                    list, // The entire list
+                    items // The entire list of items
+                ]
+            ]);
+
+            // console.debug('separator is:', separator);
+
+            return <>{separator}</>;
+        }))
+        : undefined;
+
+    const inner = <>{items.map((item, index) => <>{separators && index > 0 && separators[index - 1]}{item}</>)}</>;
 
     return Astro.slots.has('outer')
         ? await Astro.slots.render('outer', [list.length, inner])

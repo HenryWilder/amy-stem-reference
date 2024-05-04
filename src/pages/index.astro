@@ -12,6 +12,8 @@ import RefPath from "../components/RefPath.astro";
 import { getEntry } from "astro:content";
 import { getEntries } from "astro:content";
 import Join from "../components/Join.astro";
+import ScopeInline from "../components/ScopeInline.astro";
+import Katex from "../components/Katex.astro";
 
 interface GlossaryTreeNode {
     item: GlossaryEntry;
@@ -88,19 +90,6 @@ const debugTreeRecursively = (nodes: GlossaryTreeNode[]) => {
             });
         </script>
     </Fragment>
-    <!-- ['apple', 'orange', 'banana', 'mango'] -->
-    <Join list={undefined} optional>
-        {(item: string, _index: number, _list: string[], _isFinal: boolean) => item}
-        <span slot="separator">
-            {(_item: string, _sepIndex: number, _list: string[], _prevItem: string, isFinal: boolean) => isFinal ? ' and ' : ', '}
-        </span>
-        <span slot="outer">
-            {(numElements: number, inner: any) => <>{numElements} elements: [{inner}]</>}
-        </span>
-        <Fragment slot="if-undefined">
-            undefined
-        </Fragment>
-    </Join>
     <main>
     {() => {
         const renderTree = async (nodes: GlossaryTreeNode[], depth: number) => {
@@ -139,13 +128,30 @@ const debugTreeRecursively = (nodes: GlossaryTreeNode[]) => {
 
                                                 const ioList = (delim: 'paren' | 'brace', source: GlossaryEntry[]) =>
                                                     <ScopeBlock delim={delim} horizontal>
-                                                        <table class="parameter-list">{
-                                                            source.map((srcItem) => <tr>
-                                                                <td><Ref item={srcItem}/><Keyword tkn="type annotation"/></td>
-                                                                <td><TypeUnion list={srcItem.data.typeUnion!}/><Keyword tkn="separator"/></td>
-                                                            </tr>
-                                                        )}</table>
+                                                        <Join list={source}>
+                                                            {(srcItem: GlossaryEntry) => {
+                                                                const param = <Ref item={srcItem}/>;
+                                                                const paramType = <TypeUnion list={srcItem.data.typeUnion!}/>;
+                                                                return <>
+                                                                    {param}<Keyword
+                                                                        tkn="type annotation"
+                                                                        prev={param}
+                                                                        next={paramType}
+                                                                    />
+                                                                    {paramType}
+                                                                </>
+                                                            }}
+                                                            <span slot="separator">
+                                                                {([prevProps, _prev]: [GlossaryEntry, any], [nextProps, _next]: [GlossaryEntry, any]) => {
+                                                                    const prev = <Ref item={prevProps}/>;
+                                                                    const next = <Ref item={nextProps}/>;
+                                                                    return <><Keyword tkn="separator" prev={prev} next={next}/> </>
+                                                                }}
+                                                            </span>
+                                                        </Join>
                                                     </ScopeBlock>;
+
+                                                const implies = <ScopeInline delim="{}"><span style="color:gray">...</span></ScopeInline>;
 
                                                 return <>
                                                     <Keyword tkn={item.data.kind}/>
@@ -153,21 +159,23 @@ const debugTreeRecursively = (nodes: GlossaryTreeNode[]) => {
                                                     <div class="function-signature">
                                                         {ioList('paren', parameters)}
                                                         <span style="font-size:2em">
-                                                            <Keyword tkn="becomes"/>
+                                                            <Keyword tkn="becomes" prev={ioList('paren', parameters)} next={ioList('brace', returns)}/>
                                                         </span>
                                                         {ioList('brace', returns)}
                                                         <span style="font-size:2em">
-                                                            <Keyword tkn="implies"/>
+                                                            <Keyword tkn="implies" prev={ioList('brace', returns)} next={implies}/>
                                                         </span>
                                                     </div>
                                                 </>;
 
                                             // Fields
                                             case 'field':
+                                                const field = <Ref item={item}/>;
+                                                const fieldType = <TypeUnion list={item.data.typeUnion!}/>;
                                                 return <>
                                                     <Keyword tkn={item.data.kind}/>
-                                                    <Ref item={item}/><Keyword tkn="type annotation"/>
-                                                    <TypeUnion list={item.data.typeUnion!}/><Keyword tkn="end of statement"/>
+                                                    {field}<Keyword tkn="type annotation" prev={field} next={fieldType}/>
+                                                    {fieldType}<Keyword tkn="end of statement"/>
                                                 </>;
 
                                             // Parameters and Returns
@@ -175,9 +183,9 @@ const debugTreeRecursively = (nodes: GlossaryTreeNode[]) => {
                                             case 'return':
                                                 return <>
                                                     <Keyword tkn={item.data.kind}/>
-                                                    <span class="type">&lbrace;</span>
-                                                    <TypeUnion list={item.data.typeUnion!}/>
-                                                    <span class="type">&rbrace;</span>
+                                                    <ScopeInline delim="{}" typeScope>
+                                                        <TypeUnion list={item.data.typeUnion!}/>
+                                                    </ScopeInline>
                                                     <Ref item={item}/>
                                                 </>;
 
@@ -185,16 +193,24 @@ const debugTreeRecursively = (nodes: GlossaryTreeNode[]) => {
                                             case 'type':
                                             case 'trait':
                                                 const traits = item.data.traits && await getEntries(item.data.traits);
+
+                                                const traitOrType = <Ref item={item}/>;
+
+                                                const traitList = traits && <Join list={traits}>
+                                                    {(trait: GlossaryEntry) => <LilRef item={trait}/>}
+                                                    <span slot="separator">
+                                                        {([_prevProps, prev]: [GlossaryEntry, any], [_nextProps, next]: [GlossaryEntry, any]) =>
+                                                            <>&nbsp;<Keyword tkn="combine traits" prev={prev} next={next}/>&nbsp;</>
+                                                        }
+                                                    </span>
+                                                </Join>;
+
                                                 return <>
                                                     <Keyword tkn={item.data.kind}/>
-                                                    <Ref item={item}/>
+                                                    {traitOrType}
                                                     {item.data.traits && <>
-                                                        <Keyword tkn="implements"/>
-                                                        {traits && <>
-                                                            <LilRef item={traits[0]}/>{traits.slice(1).map((trait) => {
-                                                                return <>&nbsp;<Keyword tkn="combine traits"/> <LilRef item={trait}/></>;
-                                                            })}
-                                                        </>}
+                                                        <Keyword tkn="implements" prev={traitOrType} next={traitList}/>
+                                                        {traitList}
                                                     </>}
                                                 </>;
 
@@ -237,20 +253,24 @@ const debugTreeRecursively = (nodes: GlossaryTreeNode[]) => {
                                 </Fragment>
                             </Comment>
                             <table class="alias-list">{
-                                Object.entries(item.data.aliases).map(([alias, kind]) => <tr>
-                                    <td>
-                                        {/* All aliases are static */}
-                                        <Keyword tkn="static"/>
-                                        <Keyword tkn={kind}/>
-                                    </td>
-                                    <td>
-                                        &nbsp;<Ref item={item} overrideKind={kind} alias>{alias}</Ref>
-                                    </td>
-                                    <td>
-                                        &nbsp;<Keyword tkn={kind === item.data.kind ? 'assign' : 'similar to'}/>
-                                        <Ref item={item}/><Keyword tkn="end of statement"/>
-                                    </td>
-                                </tr>)
+                                Object.entries(item.data.aliases).map(([alias, kind]) => {
+                                    const aliasRef = <Ref item={item} overrideKind={kind} alias>{alias}</Ref>;
+                                    const aliasing = <Ref item={item}/>;
+                                    return <tr>
+                                        <td>
+                                            {/* All aliases are static */}
+                                            <Keyword tkn="static"/>
+                                            <Keyword tkn={kind}/>
+                                        </td>
+                                        <td>
+                                            &nbsp;{aliasRef}
+                                        </td>
+                                        <td>
+                                            &nbsp;<Keyword tkn={kind === item.data.kind ? 'assign' : 'similar to'} prev={aliasRef} next={aliasing}/>
+                                            {aliasing}<Keyword tkn="end of statement"/>
+                                        </td>
+                                    </tr>
+                                })
                             }</table>
                         </>}
 
@@ -264,6 +284,19 @@ const debugTreeRecursively = (nodes: GlossaryTreeNode[]) => {
                         <div class="item-description">
                             <Description/>
                         </div>
+
+                        {/* Notation */}
+                        {item.data.notation && <>
+                            <Comment hDepth={innerDepth}>
+                                Notation
+                                <Fragment slot="tooltip">
+                                    Notation for <Keyword tkn={item.data.kind}/> <LilRef item={item}/>.
+                                </Fragment>
+                            </Comment>
+                            <div class="item-description">
+                                <Katex tex={item.data.notation}/>
+                            </div>
+                        </>}
 
                         {/* Children */}
                         {renderedChildren.map(([kind, childrenOfKind]) => {
@@ -307,7 +340,7 @@ const debugTreeRecursively = (nodes: GlossaryTreeNode[]) => {
                                 <Comment hDepth={innerDepth}>
                                     {text}
                                     <Fragment slot="tooltip">
-                                        {desc} the <LilRef item={item}/> {item.data.kind}
+                                        {desc} the <LilRef item={item}/> {item.data.kind}.
                                     </Fragment>
                                 </Comment>
                                 {childrenOfKind}

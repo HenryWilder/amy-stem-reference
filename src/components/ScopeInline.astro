@@ -1,9 +1,11 @@
 ---
 interface Props {
     delim: [string, string] | string;
+    /** The scope is describing specifically a type */
+    typeScope?: true;
 }
 
-const { delim } = Astro.props;
+const { delim, typeScope } = Astro.props;
 
 if (typeof delim === 'string' && delim.length !== 2) {
     throw new Error(`The ScopeInline delimiter "${delim}" should be exactly two elements`);
@@ -31,7 +33,7 @@ if (typeof delim === 'string' && delim.length !== 2) {
 </style>
 
 <span class="scope inline"
-    ><span class="scope-delimiter">{delim[0]}</span
+    ><span class:list={["scope-delimiter", typeScope && 'type']}>{delim[0]}</span
     ><span class="scope-inner"><slot></slot></span
-    ><span class="scope-delimiter">{delim[1]}</span
+    ><span class:list={["scope-delimiter", typeScope && 'type']}>{delim[1]}</span
 ></span>

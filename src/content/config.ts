@@ -49,7 +49,7 @@ const glossaryCollection = defineCollection({
             }
 
             // notation
-            if (val.kind === 'type' || val.kind === 'function') {
+            if (val.kind === 'type' || val.kind === 'function' || val.kind === 'constant') {
                 if (val.notation === undefined) {
                     ctx.addIssue({
                         code: z.ZodIssueCode.custom,

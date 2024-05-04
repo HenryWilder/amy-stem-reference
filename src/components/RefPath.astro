@@ -21,15 +21,19 @@ const slugs = item.slug.split('/').map((_, index, list) => list.slice(0, index +
 const path: GlossaryEntry[] = await getEntries(slugs.map((slug) => ({ collection: 'glossary', slug })));
 ---
 
-<Join list={path}>
-    {(part: GlossaryEntry) =>
-        tooltips
-            ? <Ref item={part} onPage={onPage}/>
-            : <LilRef item={part} onPage={onPage}/>
-    }
-    <span slot="separator">
-        {(item: GlossaryEntry) =>
-            <Keyword tkn={`${item.data.kind} separator`}/>
-        }
-    </span>
-</Join>
+{() => {
+    const refOrLil = (referencing: GlossaryEntry) => tooltips
+        ? <Ref item={referencing} onPage={onPage}/>
+        : <LilRef item={referencing} onPage={onPage}/>
+
+    return <Join list={path}>
+        {(part: GlossaryEntry) => refOrLil(part)}
+        <span slot="separator">
+            {([prevProps, prev]: [GlossaryEntry, any], [nextProps, next]: [GlossaryEntry, any]) => {
+                const staticity: 'static ' | 'instance ' | '' =
+                    prevProps.data.kind !== 'module' ? (nextProps.data.isStatic ? 'static ' : 'instance ') : '';
+                return <Keyword tkn={`${staticity}${nextProps.data.kind} separator`} prev={prev} next={next}/>
+            }}
+        </span>
+    </Join>
+}}

@@ -1,9 +1,10 @@
 ---
 import { getEntries } from 'astro:content';
-import { type GlossaryRef } from '../scripts/glossary';
+import { type GlossaryEntry, type GlossaryRef } from '../scripts/glossary';
 import Ref from './Ref.astro';
 import Keyword from './syntax/Keyword.astro';
 import ScopeInline from './ScopeInline.astro';
+import Join from './Join.astro';
 
 interface Props {
     list: GlossaryRef[];
@@ -14,9 +15,19 @@ const { list, onPage } = Astro.props;
 const types = await getEntries(list);
 ---
 
-{() => {
-    const inner = <><Ref item={types[0]} onPage={onPage}/>{types.slice(1).map((ty) => <>&nbsp;<Keyword tkn="type union"/>&nbsp;<Ref item={ty} onPage={onPage}/></>)}</>;
-    return list.length > 1
-        ? <ScopeInline delim="()">{inner}</ScopeInline>
-        : inner;
-}}
+<Join list={types}>
+    {(item: GlossaryEntry) => <Ref item={item} onPage={onPage}/>}
+
+    <span slot="separator">
+        {([_prevProps, prev]: [GlossaryEntry, any], [_nextProps, next]: [GlossaryEntry, any]) =>
+            <>&nbsp;<Keyword tkn="type union" prev={prev} next={next}/>&nbsp;</>
+        }
+    </span>
+
+    <span slot="outer">
+        {(count: number, inner: any) => count > 1
+            ? <ScopeInline delim="()">{inner}</ScopeInline>
+            : inner
+        }
+    </span>
+</Join>

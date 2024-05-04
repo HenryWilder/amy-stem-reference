@@ -14,6 +14,8 @@ const validKeywords = [
     'static',
     'instance',
     'member',
+    'method',
+    'property',
     'extends',
     'implements',
     'assign',
@@ -21,20 +23,44 @@ const validKeywords = [
     'end of statement',
     'separator',
     'combine traits',
+    'for',
 ] as const;
 
 type ValidKindSeparator = `${'static ' | 'instance ' | ''}${Kind} separator`; // instance if blank
 
 export type ValidKeyword = (typeof validKeywords)[number] | ValidKindSeparator;
 
-interface Props {
-    tkn: ValidKeyword;
+type NeedsContext =
+    | 'implements'
+    | 'extends'
+    | 'assign'
+    | 'similar to'
+    | 'separator'
+    | 'becomes'
+    | 'maps to'
+    | 'implies'
+    | 'type annotation'
+    | 'type union'
+    | 'type intersection'
+    | 'combine traits'
+    | ValidKindSeparator;
+
+type Props = {
     fullName?: true;
-}
+} & ({
+        tkn: Exclude<ValidKeyword, NeedsContext>;
+        prev?: undefined;
+        next? : undefined;
+    } | {
+        tkn: NeedsContext;
+        prev: any;
+        next: any;
+    }
+);
 
-const { tkn, fullName } = Astro.props;
+const { tkn, prev = 'ERR', next = 'ERR', fullName } = Astro.props;
 
-type TokenData = { symbol: any, description: any, keywordType?: 'keyword' | 'control' | 'punctuation' };
+type TokenData = { symbol: any, description: any, keywordType?: 'keyword' | 'control' | 'operator' };
 
 if (fullName && Astro.slots.has('default')) {
     console.warn(
@@ -46,29 +72,37 @@ if (fullName && Astro.slots.has('default')) {
 {() => {
     const tokenData: TokenData = (() => {
         switch (tkn) {
+            case 'for':
+                return {
+                    symbol: <>&forall;</>,
+                    description: <>
+                        Repeat for every element.
+                    </>,
+                    keywordType: 'control',
+                };
             case 'assign':
                 return {
                     symbol: '=',
                     description: <>
-                        The previous item is the same as the following item.
+                        {prev}&nbsp;is the same as&nbsp;{next}.
                     </>,
-                    keywordType: 'punctuation',
+                    keywordType: 'operator',
                 };
             case 'similar to':
                 return {
                     symbol: '~',
                     description: <>
-                        The previous item is similar to the following item.
+                        {prev}&nbsp;is similar to&nbsp;{next}.
                     </>,
-                    keywordType: 'punctuation',
+                    keywordType: 'operator',
                 };
             case 'separator':
                 return {
                     symbol: ',',
                     description: <>
-                        The item is followed by another item.
+                        {prev}&nbsp;is followed by&nbsp;{next}.
                     </>,
-                    keywordType: 'punctuation',
+                    keywordType: 'operator',
                 };
             case 'end of statement':
                 return {
@@ -76,69 +110,81 @@ if (fullName && Astro.slots.has('default')) {
                     description: <>
                         The statement is complete.
                     </>,
-                    keywordType: 'punctuation',
+                    keywordType: 'operator',
                 };
             case 'becomes':
                 return {
                     symbol: <>&rarr;</>,
                     description: <>
-                        The previous item becomes the following item.
+                        {prev}&nbsp;becomes&nbsp;{next}.
                     </>,
                 };
             case 'maps to':
                 return {
                     symbol: <>&mapsto;</>,
                     description: <>
-                        The previous item maps to the following item.
+                        {prev}&nbsp;maps to&nbsp;{next}.
                     </>,
                 };
             case 'implies':
                 return {
                     symbol: <>&rArr;</>,
                     description: <>
-                        The previous item implies the following item.
+                        {prev}&nbsp;implies&nbsp;{next}.
                     </>,
                 };
             case 'type annotation':
                 return {
                     symbol: ':',
                     description: <>
-                        The previous item is of the <Astro.self fullName tkn="type"/> described by the following item.
+                        {prev}&nbsp;is of the&nbsp;<Astro.self fullName tkn="type"/>&nbsp;described by&nbsp;{next}.
                     </>,
-                    keywordType: 'punctuation',
+                    keywordType: 'operator',
                 };
             case 'type union':
                 return {
                     symbol: <>&or;</>,
-                    description: <>
-                        The union of <Astro.self tkn="type">types</Astro.self>
-                        (<Astro.self fullName tkn="type"/> a <em>or</em>&nbsp;<Astro.self fullName tkn="type"/> b).
-                    </>,
-                    keywordType: 'punctuation',
+                    description: [<>
+                        The union of&nbsp;<Astro.self tkn="type">types</Astro.self>.
+                    </>, <>
+                        (<Astro.self fullName tkn="type"/>&nbsp;{prev}&nbsp;<em>or</em>&nbsp;<Astro.self fullName tkn="type"/>&nbsp;{next}).
+                    </>],
+                    keywordType: 'operator',
                 };
             case 'type intersection':
                 return {
                     symbol: <>&and;</>,
-                    description: <>
-                        The intersection of <Astro.self tkn="type">types</Astro.self>
-                        (<Astro.self fullName tkn="type"/> a <em>and</em>&nbsp;<Astro.self fullName tkn="type"/> b).
-                    </>,
-                    keywordType: 'punctuation',
+                    description: [<>
+                        The intersection of&nbsp;<Astro.self tkn="type">types</Astro.self>.
+                    </>, <>
+                        (<Astro.self fullName tkn="type"/>&nbsp;{prev}&nbsp;<em>and</em>&nbsp;<Astro.self fullName tkn="type"/>&nbsp;{next}).
+                    </>],
+                    keywordType: 'operator',
                 };
             case 'combine traits':
                 return {
                     symbol: '+',
-                    description: <>
-                        Combines multiple <Astro.self tkn="trait">traits</Astro.self> to be <Astro.self tkn="implements">implemented</Astro.self>
-                        (<Astro.self fullName tkn="type"/> a <em>and</em>&nbsp;<Astro.self fullName tkn="type"/> b).
-                    </>,
-                    keywordType: 'punctuation',
+                    description: [<>
+                        Combines multiple&nbsp;<Astro.self tkn="trait">traits</Astro.self>&nbsp;to be&nbsp;<Astro.self tkn="implements" prev={prev} next={next}>implemented</Astro.self>.
+                    </>, <>
+                        (<Astro.self fullName tkn="implements" prev={prev} next={next}
+                        />&nbsp;<Astro.self fullName tkn="trait"/>&nbsp;{prev}&nbsp;<em>and</em>&nbsp;<Astro.self fullName tkn="trait"/>&nbsp;{next}).
+                    </>],
+                    keywordType: 'operator',
                 };
             case 'function':
                 return {
                     symbol: 'fn',
                     description: <>
                         Takes input and produces output.
+                    </>,
+                };
+            case 'method':
+                return {
+                    symbol: 'fn',
+                    description: <>
+                        An&nbsp;<Astro.self fullName tkn="instance"/>&nbsp;<Astro.self fullName tkn="member"/>&nbsp;<Astro.self fullName tkn="function"
+                        />&nbsp;of a&nbsp;<Astro.self fullName tkn="type"/>.
                     </>,
                 };
             case 'module':
@@ -155,32 +201,39 @@ if (fullName && Astro.slots.has('default')) {
                         A variable part of an object.
                     </>,
                 };
+            case 'property':
+                return {
+                    symbol: '@property',
+                    description: <>
+                        A&nbsp;<Astro.self fullName tkn="field"/>-like&nbsp;<Astro.self fullName tkn="method"/>.
+                    </>,
+                };
             case 'parameter':
                 return {
                     symbol: '@param',
                     description: <>
-                        An input to a <Astro.self fullName tkn="function"/>.
+                        An input to a&nbsp;<Astro.self fullName tkn="function"/>.
                     </>,
                 };
             case 'return':
                 return {
                     symbol: '@return',
                     description: <>
-                        An output of a <Astro.self fullName tkn="function"/>.
+                        An output from a&nbsp;<Astro.self fullName tkn="function"/>.
                     </>,
                 };
             case 'implements':
                 return {
                     symbol: 'impl',
                     description: <>
-                        The object follows the template of the following <Astro.self fullName tkn="trait"/>(s).
+                        {prev}&nbsp;follows the template of the&nbsp;<Astro.self fullName tkn="trait"/>(s) '{next}'.
                     </>,
                 };
             case 'extends':
                 return {
                     symbol: 'extends',
                     description: <>
-                        The object builds upon the template of the following <Astro.self fullName tkn="type"/>(s).
+                        {prev}&nbsp;builds upon the template of the&nbsp;<Astro.self fullName tkn="type"/>(s) '{next}'.
                     </>,
                 };
             case 'null':
@@ -208,21 +261,21 @@ if (fullName && Astro.slots.has('default')) {
                 return {
                     symbol: 'member',
                     description: <>
-                        Belonging to another object or <Astro.self fullName tkn="module"/>.
+                        Belonging to another object or&nbsp;<Astro.self fullName tkn="module"/>.
                     </>,
                 };
             case 'type':
                 return {
                     symbol: 'type',
                     description: <>
-                        An object's structure.
+                        An object structure.
                     </>,
                 };
             case 'trait':
                 return {
                     symbol: 'trait',
                     description: <>
-                        A template or guide for the basis of a <Astro.self fullName tkn="type"/>.
+                        A template or guide describing the generalized&nbsp;<Astro.self tkn="property">properties</Astro.self>&nbsp;of a&nbsp;<Astro.self fullName tkn="type"/>.
                     </>,
                 };
             case 'constant':
@@ -237,9 +290,9 @@ if (fullName && Astro.slots.has('default')) {
                 if (kindSeparator !== null) {
                     const [_, staticity = 'static', kind] = kindSeparator as string[] as [string, 'static' | 'instance' | undefined, Kind];
 
-                    const symbol = ['parameter', 'return'].includes(kind)
+                    const symbol = kind === 'parameter' || kind === 'return'
                         ? '@'
-                        : staticity === undefined
+                        : staticity === 'instance'
                             ? '#'
                             : '::';
 
@@ -247,13 +300,13 @@ if (fullName && Astro.slots.has('default')) {
                     return {
                         symbol,
                         description: <>
-                            The following is {aOrAn
+                            {next}&nbsp;is&nbsp;{aOrAn
                             }&nbsp;<Astro.self fullName tkn={staticity}
                             />&nbsp;<Astro.self fullName tkn="member"
-                            />&nbsp;<Astro.self fullName tkn={kind}/>
-                            within the namespace of the previous item.
+                            />&nbsp;<Astro.self fullName tkn={kind}
+                            />&nbsp;within&nbsp;{prev}.
                         </>,
-                        keywordType: 'punctuation',
+                        keywordType: 'operator',
                     }
                 } else {
                     throw new Error(`The token '${tkn}' has not been handled`);
@@ -267,7 +320,13 @@ if (fullName && Astro.slots.has('default')) {
         <span class={keywordType}><slot>{fullName ? tkn : symbol}</slot></span>
         <Fragment slot="content">
             <p class={keywordType}>'{tkn}' {keywordType}</p>
-            <div style="display:inline">{description}</div>
+            {() => {
+                const wrapper = (inner: any) => <div style="display:flex;flex-flow:row-nowrap;align-items: center;">{inner}</div>;
+
+                return Array.isArray(description)
+                    ? description.map((line) => wrapper(line))
+                    : wrapper(description);
+            }}
         </Fragment>
     </Tooltip>;
 }}

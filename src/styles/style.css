@@ -20,61 +20,12 @@ a {
     }
 }
 
-.keyword {
-    cursor: default;
-    color: dodgerblue;
-
-    &.control {
-        color: violet;
-    }
-}
-
-.type {
-    color: lightseagreen;
-}
-
-.function {
-    color: goldenrod;
-}
-
-.module {
-    color: chocolate;
-}
-
-.comment {
-    color: seagreen;
-    cursor: default;
-
-    &::before {
-        content: '// ';
-    }
-}
-
 h3 {
     margin-bottom: 0.25em;
 
     &:first-child {
         margin-top: 0;
     }
-}
-
-/* todo colorize notation for literal vs variable with button to switch */
-
-.field, .return {
-    color: gray;
-}
-
-.parameter {
-    color: lightskyblue;
-}
-
-.trait {
-    color: tomato;
-}
-
-.punctuation {
-    color: #bbb;
-    cursor: default;
 }
 
 ul.alias-list {
@@ -170,7 +121,7 @@ table.parameter-list {
         transition: 70ms ease-in-out;
 
         &:not(:hover) {
-            background-color: color-mix(in srgb, var(--scope-color) 5%, transparent);
+            background-color: color-mix(in srgb, var(--scope-color) 1%, transparent);
         }
     }
 
@@ -298,4 +249,74 @@ table.parameter-list {
 
 .no-element-wrap {
     display: inline;
+}
+
+.keyword {
+    cursor: default;
+    color: dodgerblue;
+
+    &.control {
+        color: orchid;
+    }
+}
+
+.constant {
+    color: deepskyblue;
+}
+
+.literal {
+    /* color: palegreen; */
+    color: aquamarine;
+}
+
+/* syntax highlighting */
+
+.type {
+    color: lightseagreen;
+    --scope-color: lightseagreen;
+}
+
+.function {
+    color: goldenrod;
+}
+
+.module {
+    color: chocolate;
+}
+
+.comment {
+    color: seagreen;
+    cursor: default;
+
+    &::before {
+        content: '// ';
+    }
+}
+
+/* todo colorize notation for literal vs variable with button to switch */
+
+.field {
+    color: violet;
+}
+
+.return {
+    color: lightskyblue;
+}
+
+.parameter {
+    color: #999;
+}
+
+.trait {
+    color: tomato;
+}
+
+.punctuation {
+    color: #bbb;
+    cursor: default;
+}
+
+.operator {
+    color: #bababd;
+    cursor: default;
 }
