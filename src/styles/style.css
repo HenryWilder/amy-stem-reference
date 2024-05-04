@@ -295,3 +295,7 @@ table.parameter-list {
     gap: 1ch;
     align-items: center;
 }
+
+.no-element-wrap {
+    display: inline;
+}

@@ -1,5 +1,5 @@
 ---
-import { kinds } from '../../scripts/glossary';
+import { type Kind, kinds } from '../../scripts/glossary';
 import Tooltip from '../Tooltip.astro';
 
 const validKeywords = [
@@ -12,6 +12,8 @@ const validKeywords = [
     'type union',
     'type intersection',
     'static',
+    'instance',
+    'member',
     'extends',
     'implements',
     'assign',
@@ -19,129 +21,253 @@ const validKeywords = [
     'end of statement',
     'separator',
     'combine traits',
-];
+] as const;
 
-export type ValidKeyword = (typeof validKeywords)[number];
+type ValidKindSeparator = `${'static ' | 'instance ' | ''}${Kind} separator`; // instance if blank
 
-export const isValidKeyword = (x: any): x is ValidKeyword => validKeywords.map((kw) => kw as string).includes(x);
+export type ValidKeyword = (typeof validKeywords)[number] | ValidKindSeparator;
 
 interface Props {
     tkn: ValidKeyword;
+    fullName?: true;
 }
 
-const { tkn } = Astro.props;
+const { tkn, fullName } = Astro.props;
 
-const tokenData: Record<ValidKeyword, { symbol: any, description: string, keywordType?: 'keyword' | 'control' | 'punctuation' }> = {
-    'assign': {
-        symbol: '=',
-        description: 'the preceding item is equal to the following item',
-        keywordType: 'punctuation',
-    },
-    'similar to': {
-        symbol: '~',
-        description: 'the preceding item is similar to the following item',
-        keywordType: 'punctuation',
-    },
-    'separator': {
-        symbol: ',',
-        description: 'designates that the item is followed by another item',
-        keywordType: 'punctuation',
-    },
-    'end of statement': {
-        symbol: ';',
-        description: 'designates that the statement is complete',
-        keywordType: 'punctuation',
-    },
-    'becomes': {
-        symbol: '&rarr;',
-        description: 'the preceding item becomes the following item',
-    },
-    'maps to': {
-        symbol: '&mapsto;',
-        description: 'the preceding item maps to the following item',
-    },
-    'implies': {
-        symbol: '&rArr;',
-        description: 'the preceding item implies the following item',
-    },
-    'type annotation': {
-        symbol: ':',
-        description: 'shows that the preceding item is of the type described by the following item',
-        keywordType: 'punctuation',
-    },
-    'type union': {
-        symbol: '&or;',
-        description: 'produces a union of types (type a <em>or</em> type b)',
-        keywordType: 'punctuation',
-    },
-    'type intersection': {
-        symbol: '&and;',
-        description: 'produces an intersection of types (type a <em>and</em> type b)',
-        keywordType: 'punctuation',
-    },
-    'combine traits': {
-        symbol: '+',
-        description: 'combines multiple traits to be implemented (trait a <em>and</em> trait b)',
-        keywordType: 'punctuation',
-    },
-    'function': {
-        symbol: 'fn',
-        description: 'takes parameters and produces a result',
-    },
-    'module': {
-        symbol: 'mod',
-        description: 'an entire area of a study',
-    },
-    'field': {
-        symbol: 'pub',
-        description: 'a part of an object',
-    },
-    'parameter': {
-        symbol: '@param',
-        description: 'an input to a function',
-    },
-    'return': {
-        symbol: '@return',
-        description: 'an output of a function',
-    },
-    'implements': {
-        symbol: 'impl',
-        description: 'the object follows the template of this trait',
-    },
-    'extends': {
-        symbol: 'extends',
-        description: 'the object builds upon the template of this type',
-    },
-    'null': {
-        symbol: 'null',
-        description: 'nothing',
-    },
-    'static': {
-        symbol: 'static',
-        description: 'external to the object possessing it OR an unchanging property',
-    },
-    'type': {
-        symbol: 'type',
-        description: 'an object\'s structure',
-    },
-    'trait': {
-        symbol: 'trait',
-        description: 'a template or guide for the basis of a type',
-    },
-    'constant': {
-        symbol: 'const',
-        description: 'an unchanging value',
-    },
-};
+type TokenData = { symbol: any, description: any, keywordType?: 'keyword' | 'control' | 'punctuation' };
 
-const { symbol, description, keywordType = 'keyword' } = tokenData[tkn];
+if (fullName && Astro.slots.has('default')) {
+    console.warn(
+        `Using the 'fullName' property on a Keyword using the default slot is redundant.\n` +
+        `  The slot ("${await Astro.slots.render('default')}") will take priority over the non-symbolic name of the keyword ("${tkn}").`);
+}
 ---
 
-<Tooltip>
-    <span class={keywordType} set:html={symbol}></span>
-    <Fragment slot="content">
-        <p class={keywordType}>'{tkn}' {keywordType}</p>
-        <p set:html={description}></p>
-    </Fragment>
-</Tooltip>
+{() => {
+    const tokenData: TokenData = (() => {
+        switch (tkn) {
+            case 'assign':
+                return {
+                    symbol: '=',
+                    description: <>
+                        The previous item is the same as the following item.
+                    </>,
+                    keywordType: 'punctuation',
+                };
+            case 'similar to':
+                return {
+                    symbol: '~',
+                    description: <>
+                        The previous item is similar to the following item.
+                    </>,
+                    keywordType: 'punctuation',
+                };
+            case 'separator':
+                return {
+                    symbol: ',',
+                    description: <>
+                        The item is followed by another item.
+                    </>,
+                    keywordType: 'punctuation',
+                };
+            case 'end of statement':
+                return {
+                    symbol: ';',
+                    description: <>
+                        The statement is complete.
+                    </>,
+                    keywordType: 'punctuation',
+                };
+            case 'becomes':
+                return {
+                    symbol: <>&rarr;</>,
+                    description: <>
+                        The previous item becomes the following item.
+                    </>,
+                };
+            case 'maps to':
+                return {
+                    symbol: <>&mapsto;</>,
+                    description: <>
+                        The previous item maps to the following item.
+                    </>,
+                };
+            case 'implies':
+                return {
+                    symbol: <>&rArr;</>,
+                    description: <>
+                        The previous item implies the following item.
+                    </>,
+                };
+            case 'type annotation':
+                return {
+                    symbol: ':',
+                    description: <>
+                        The previous item is of the <Astro.self fullName tkn="type"/> described by the following item.
+                    </>,
+                    keywordType: 'punctuation',
+                };
+            case 'type union':
+                return {
+                    symbol: <>&or;</>,
+                    description: <>
+                        The union of <Astro.self tkn="type">types</Astro.self>
+                        (<Astro.self fullName tkn="type"/> a <em>or</em>&nbsp;<Astro.self fullName tkn="type"/> b).
+                    </>,
+                    keywordType: 'punctuation',
+                };
+            case 'type intersection':
+                return {
+                    symbol: <>&and;</>,
+                    description: <>
+                        The intersection of <Astro.self tkn="type">types</Astro.self>
+                        (<Astro.self fullName tkn="type"/> a <em>and</em>&nbsp;<Astro.self fullName tkn="type"/> b).
+                    </>,
+                    keywordType: 'punctuation',
+                };
+            case 'combine traits':
+                return {
+                    symbol: '+',
+                    description: <>
+                        Combines multiple <Astro.self tkn="trait">traits</Astro.self> to be <Astro.self tkn="implements">implemented</Astro.self>
+                        (<Astro.self fullName tkn="type"/> a <em>and</em>&nbsp;<Astro.self fullName tkn="type"/> b).
+                    </>,
+                    keywordType: 'punctuation',
+                };
+            case 'function':
+                return {
+                    symbol: 'fn',
+                    description: <>
+                        Takes input and produces output.
+                    </>,
+                };
+            case 'module':
+                return {
+                    symbol: 'mod',
+                    description: <>
+                        An entire area of a study.
+                    </>,
+                };
+            case 'field':
+                return {
+                    symbol: 'pub',
+                    description: <>
+                        A variable part of an object.
+                    </>,
+                };
+            case 'parameter':
+                return {
+                    symbol: '@param',
+                    description: <>
+                        An input to a <Astro.self fullName tkn="function"/>.
+                    </>,
+                };
+            case 'return':
+                return {
+                    symbol: '@return',
+                    description: <>
+                        An output of a <Astro.self fullName tkn="function"/>.
+                    </>,
+                };
+            case 'implements':
+                return {
+                    symbol: 'impl',
+                    description: <>
+                        The object follows the template of the following <Astro.self fullName tkn="trait"/>(s).
+                    </>,
+                };
+            case 'extends':
+                return {
+                    symbol: 'extends',
+                    description: <>
+                        The object builds upon the template of the following <Astro.self fullName tkn="type"/>(s).
+                    </>,
+                };
+            case 'null':
+                return {
+                    symbol: 'null',
+                    description: <>
+                        Nothing.
+                    </>,
+                };
+            case 'static':
+                return {
+                    symbol: 'static',
+                    description: <>
+                        External to the object possessing it.
+                    </>,
+                };
+            case 'instance':
+                return {
+                    symbol: 'instance',
+                    description: <>
+                        Specific to an example or real world copy the object possessing it.
+                    </>,
+                };
+            case 'member':
+                return {
+                    symbol: 'member',
+                    description: <>
+                        Belonging to another object or <Astro.self fullName tkn="module"/>.
+                    </>,
+                };
+            case 'type':
+                return {
+                    symbol: 'type',
+                    description: <>
+                        An object's structure.
+                    </>,
+                };
+            case 'trait':
+                return {
+                    symbol: 'trait',
+                    description: <>
+                        A template or guide for the basis of a <Astro.self fullName tkn="type"/>.
+                    </>,
+                };
+            case 'constant':
+                return {
+                    symbol: 'const',
+                    description: <>
+                        An unchanging value.
+                    </>,
+                };
+            default:
+                const kindSeparator: RegExpExecArray | null = RegExp(`^(?:(static|instance) )?(${kinds.join('|')}) separator$`).exec(tkn);
+                if (kindSeparator !== null) {
+                    const [_, staticity = 'static', kind] = kindSeparator as string[] as [string, 'static' | 'instance' | undefined, Kind];
 
+                    const symbol = ['parameter', 'return'].includes(kind)
+                        ? '@'
+                        : staticity === undefined
+                            ? '#'
+                            : '::';
+
+                    const aOrAn = staticity[0].match(/[aeiou]/i) ? 'an' : 'a';
+                    return {
+                        symbol,
+                        description: <>
+                            The following is {aOrAn
+                            }&nbsp;<Astro.self fullName tkn={staticity}
+                            />&nbsp;<Astro.self fullName tkn="member"
+                            />&nbsp;<Astro.self fullName tkn={kind}/>
+                            within the namespace of the previous item.
+                        </>,
+                        keywordType: 'punctuation',
+                    }
+                } else {
+                    throw new Error(`The token '${tkn}' has not been handled`);
+                }
+        }
+    })();
+
+    const { symbol, description, keywordType = 'keyword' } = tokenData;
+
+    return <Tooltip>
+        <span class={keywordType}><slot>{fullName ? tkn : symbol}</slot></span>
+        <Fragment slot="content">
+            <p class={keywordType}>'{tkn}' {keywordType}</p>
+            <div style="display:inline">{description}</div>
+        </Fragment>
+    </Tooltip>;
+}}

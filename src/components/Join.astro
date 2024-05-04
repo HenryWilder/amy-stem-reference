@@ -13,7 +13,7 @@ type Props = PropsRequired | PropsOptional;
 
 const { list, optional = false } = Astro.props;
 
-console.log('is optional?:', optional);
+// console.log('is optional?:', optional);
 
 if (!Astro.slots.has('default')) {
     throw new Error(`Default slot is required for 'Join' component`);

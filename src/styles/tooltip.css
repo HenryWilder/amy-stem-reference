@@ -15,7 +15,7 @@
         z-index: 1;
 
         /* Show the tooltip text when you mouse over the tooltip container */
-        .tooltiptext {
+        & > .tooltiptext {
             visibility: visible;
             opacity: 100%;
             transition: 100ms 360ms;

@@ -209,11 +209,18 @@ const debugTreeRecursively = (nodes: GlossaryTreeNode[]) => {
 
                                     return <>
                                         <Comment hDepth={depth} id={id}>
-                                            The "<LilRef item={item}/>" {item.data.kind}
+                                            The <LilRef item={item}/> {item.data.kind}
                                             <Fragment slot="tooltip">
-                                                The {item.data.kind} by the name of "<LilRef item={item}/>"
-                                                    {aliasRefs && <>(aka {aliasRefs[0]}{aliasRefs.slice(1).map((ref) => <>, {ref}</>)})</>}<br/>
-                                                {parentItem && <>associated with the <RefPath item={parentItem}/> {parentItem.data.kind}</>}
+                                                The <Keyword tkn={item.data.kind}/> by the name of "<LilRef item={item}/>".
+                                                <br/>
+                                                {aliasRefs && <>
+                                                    (aka {aliasRefs[0]}{aliasRefs.slice(1).map((ref) => <>, {ref}</>)})
+                                                </>}
+                                                <br/>
+                                                <br/>
+                                                {parentItem && <>
+                                                    Associated with <Keyword tkn={parentItem.data.kind}/> <RefPath item={parentItem}/>.
+                                                </>}
                                             </Fragment>
                                         </Comment>
                                         {item.data.isStatic && <Keyword tkn="static"/>} {info}
@@ -226,7 +233,7 @@ const debugTreeRecursively = (nodes: GlossaryTreeNode[]) => {
                             <Comment hDepth={innerDepth}>
                                 Aliases
                                 <Fragment slot="tooltip">
-                                    Other names <LilRef item={item}/> may go by
+                                    Other names <LilRef item={item}/> may go by.
                                 </Fragment>
                             </Comment>
                             <table class="alias-list">{
@@ -251,7 +258,7 @@ const debugTreeRecursively = (nodes: GlossaryTreeNode[]) => {
                         <Comment hDepth={innerDepth}>
                             Description
                             <Fragment slot="tooltip">
-                                Description of the <LilRef item={item}/> {item.data.kind}
+                                Description of <Keyword tkn={item.data.kind}/> <LilRef item={item}/>.
                             </Fragment>
                         </Comment>
                         <div class="item-description">

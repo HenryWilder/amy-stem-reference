@@ -1,13 +1,11 @@
 ---
-import { getCollection } from 'astro:content';
 import { type GlossaryEntry } from '../scripts/glossary';
 import LilRef from './LilRef.astro';
-import { getEntry } from 'astro:content';
 import type { ValidContentEntrySlug } from 'astro:content';
 import Ref from './Ref.astro';
 import { getEntries } from 'astro:content';
-import Punc from './syntax/Punc.astro';
 import Join from './Join.astro';
+import Keyword from './syntax/Keyword.astro';
 
 export interface Props {
     item: GlossaryEntry;
@@ -21,29 +19,17 @@ const { item, tooltips, onPage } = Astro.props;
 const slugs = item.slug.split('/').map((_, index, list) => list.slice(0, index + 1).join('/') as ValidContentEntrySlug<'glossary'>);
 // console.log(slugs);
 const path: GlossaryEntry[] = await getEntries(slugs.map((slug) => ({ collection: 'glossary', slug })));
-const connector: ('@' | '::')[] = path.slice(1).map(({ data: { kind } }) => {
-    switch (kind) {
-        case 'parameter':
-            return '@';
-        default:
-            return '::';
-    }
-});
 ---
 
-<!-- <Join list={path}>
+<Join list={path}>
     {(part: GlossaryEntry) =>
         tooltips
             ? <Ref item={part} onPage={onPage}/>
             : <LilRef item={part} onPage={onPage}/>
     }
     <span slot="separator">
-        {() =>
-            <Punc ch={connector[index]}/>
+        {(item: GlossaryEntry) =>
+            <Keyword tkn={`${item.data.kind} separator`}/>
         }
     </span>
-</Join> -->
-
-{tooltips ? <Ref item={path[0]} onPage={onPage}/> : <LilRef item={path[0]} onPage={onPage}/>}{path.slice(1).map((part, index) =>
-    <><Punc ch={connector[index]}/>{tooltips ? <Ref item={part} onPage={onPage}/> : <LilRef item={part} onPage={onPage}/>}</>
-)}
+</Join>
