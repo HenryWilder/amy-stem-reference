@@ -7,22 +7,43 @@ notation: '
 \begin{bmatrix}
     {\htmlClass{anim-box}{
         \htmlClass{anim-element}{\color{tomato}x}
-        \htmlClass{anim-element}{\htmlClass{field}c_{\color{tomato}1}}
+        \htmlClass{anim-element}{\htmlClass{field}{\text{c}}_{\color{tomato}1}}
     }} \\
     {\htmlClass{anim-box}{
         \htmlClass{anim-element}{\color{lightgreen}y}
-        \htmlClass{anim-element}{\htmlClass{field}c_{\color{lightgreen}2}}
+        \htmlClass{anim-element}{\htmlClass{field}{\text{c}}_{\color{lightgreen}2}}
     }} \\
     {\htmlClass{anim-box}{
         \htmlClass{anim-element}{\color{deepskyblue}z}
-        \htmlClass{anim-element}{\htmlClass{field}c_{\color{deepskyblue}3}}
+        \htmlClass{anim-element}{\htmlClass{field}{\text{c}}_{\color{deepskyblue}3}}
     }} \\
     \htmlClass{field}\vdots \\
     {\htmlClass{anim-box}{
         \htmlClass{anim-element}{\color{gray}?}
-        \htmlClass{anim-element}{\htmlClass{field}c_{\color{gray}n}}
+        \htmlClass{anim-element}{\htmlClass{field}{\text{c}}_{\color{gray}n}}
     }}
-\end{bmatrix}}'
+\end{bmatrix}
+\quad\text{or}\quad
+\begin{pmatrix}
+    {\htmlClass{anim-box}{
+        \htmlClass{anim-element}{\color{tomato}x}
+        \htmlClass{anim-element}{\htmlClass{field}{\text{c}}_{\color{tomato}1}}
+    }},
+    {\htmlClass{anim-box}{
+        \htmlClass{anim-element}{\color{lightgreen}y}
+        \htmlClass{anim-element}{\htmlClass{field}{\text{c}}_{\color{lightgreen}2}}
+    }},
+    {\htmlClass{anim-box}{
+        \htmlClass{anim-element}{\color{deepskyblue}z}
+        \htmlClass{anim-element}{\htmlClass{field}{\text{c}}_{\color{deepskyblue}3}}
+    }},
+    \htmlClass{field}\ldots,
+    {\htmlClass{anim-box}{
+        \htmlClass{anim-element}{\color{gray}?}
+        \htmlClass{anim-element}{\htmlClass{field}{\text{c}}_{\color{gray}n}}
+    }}
+\end{pmatrix}
+}'
 ---
 import Ref from '/./src/components/MdxRef.astro';
 
