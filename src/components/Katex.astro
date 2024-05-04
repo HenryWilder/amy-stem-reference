@@ -24,7 +24,7 @@ const macros = {
 
     // #1 is content
     // #2 is tooltip
-    "\\tooltip": `\\htmlClass{${tooltip}}{#1\\htmlClass{${tooltipText}}{#2}}`,
+    "\\tooltip": `\\htmlClass{${tooltip}}{{#1}\\htmlClass{${tooltipText}}{#2}}`,
 
     // #1 is kind
     // #2 is content
@@ -52,12 +52,28 @@ const macros = {
     "\\qvor": `\\[2em]\\text{or}\\[2em]`,
 } as const;
 
+const nth = (tex: string) => tex.replace(/\\nth\{(.*?)\}/g, (_substring: string, n: string) => {
+    let th: string;
+    if (n.match(/^-?(?:[0-9]*[02-9])?[1-3]$/)) {
+        const ones = n.at(-1)! as '1' | '2' | '3';
+        switch (ones) {
+            case '1':  th = 'st'; break;
+            case '2':  th = 'nd'; break;
+            case '3':  th = 'rd'; break;
+        }
+    } else {
+        th = 'th';
+    }
+    const replacement = `{\\({${n}}^{\\text{${th}}}\\)}`;
+    // console.log(`replaced '${_substring}' with '${replacement}'`); // debug
+    return replacement;
+});
+
 const rxRef = /\\ref\{(.*?)\}(?:\[(.*?)\])?/g;
 
 const allEntries = tex.match(rxRef) ? await getCollection('glossary') : undefined;
 
-const modifiedTex = tex.replace(rxRef, (_substring: string, slug: string, content: string | undefined) => {
-    // console.log(`found the \\ref '${_substring}'`); // debug
+const ref = (tex: string) => tex.replace(rxRef, (_substring: string, slug: string, content: string | undefined) => {
     if (allEntries === undefined) {
         throw new Error('allEntries must be defined if any \\ref macros exist');
     }
@@ -70,10 +86,12 @@ const modifiedTex = tex.replace(rxRef, (_substring: string, slug: string, conten
     const tooltip = `\\text{${item.data.brief}}`;
     const name = content ?? `\\text{${slug.split('/').at(-1)}}`;
     const fullRef = `\\fullref{${href}}{${kind}}{${name}}{${tooltip}}`;
-    // console.log(`produced the \\fullref '${fullRef}'`); // debug
+    console.log(`replaced '${_substring}' with '${fullRef}'`); // debug
     return fullRef;
 });
-// console.log(`the tex '${tex}' became '${modifiedTex}'`); // debug
+
+const modifiedTex = ref(nth(tex));
+console.log(`the tex '${tex}' became '${modifiedTex}'`); // debug
 ---
 
 <Fragment set:html={katex.renderToString(modifiedTex, { trust: true, macros: macros, strict: 'ignore' })} />
