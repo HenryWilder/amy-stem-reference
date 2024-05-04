@@ -7,6 +7,7 @@ import type { ValidContentEntrySlug } from 'astro:content';
 import Ref from './Ref.astro';
 import { getEntries } from 'astro:content';
 import Punc from './syntax/Punc.astro';
+import Join from './Join.astro';
 
 export interface Props {
     item: GlossaryEntry;
@@ -29,6 +30,19 @@ const connector: ('@' | '::')[] = path.slice(1).map(({ data: { kind } }) => {
     }
 });
 ---
+
+<!-- <Join list={path}>
+    {(part: GlossaryEntry) =>
+        tooltips
+            ? <Ref item={part} onPage={onPage}/>
+            : <LilRef item={part} onPage={onPage}/>
+    }
+    <span slot="separator">
+        {() =>
+            <Punc ch={connector[index]}/>
+        }
+    </span>
+</Join> -->
 
 {tooltips ? <Ref item={path[0]} onPage={onPage}/> : <LilRef item={path[0]} onPage={onPage}/>}{path.slice(1).map((part, index) =>
     <><Punc ch={connector[index]}/>{tooltips ? <Ref item={part} onPage={onPage}/> : <LilRef item={part} onPage={onPage}/>}</>

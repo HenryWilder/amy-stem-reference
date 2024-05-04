@@ -88,17 +88,18 @@ const debugTreeRecursively = (nodes: GlossaryTreeNode[]) => {
             });
         </script>
     </Fragment>
-    <Join list={['apple', 'orange', 'banana', 'mango']}>
+    <!-- ['apple', 'orange', 'banana', 'mango'] -->
+    <Join list={undefined} optional>
         {(item: string, _index: number, _list: string[], _isFinal: boolean) => item}
         <span slot="separator">
             {(_item: string, _sepIndex: number, _list: string[], _prevItem: string, isFinal: boolean) => isFinal ? ' and ' : ', '}
         </span>
-        <span slot="outer-single">
-            {(inner: any) => inner}
+        <span slot="outer">
+            {(numElements: number, inner: any) => <>{numElements} elements: [{inner}]</>}
         </span>
-        <span slot="outer-plural">
-            {(inner: any) => <>({inner})</>}
-        </span>
+        <Fragment slot="if-undefined">
+            undefined
+        </Fragment>
     </Join>
     <main>
     {() => {

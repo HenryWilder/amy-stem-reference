@@ -1,51 +1,33 @@
 ---
-interface Props {
-    list: any[];
+interface PropsRequired {
+    list?: any[];
+    optional: true;
 }
 
-const { list } = Astro.props;
+interface PropsOptional {
+    list: any[];
+    optional?: false;
+}
+
+type Props = PropsRequired | PropsOptional;
+
+const { list, optional = false } = Astro.props;
+
+console.log('is optional?:', optional);
 
 if (!Astro.slots.has('default')) {
     throw new Error(`Default slot is required for 'Join' component`);
 }
-
-const hasSeparator = Astro.slots.has('separator');
-
-const hasOuterSingle = Astro.slots.has('outer-single');
-const hasOuterPlural = Astro.slots.has('outer-plural');
-const hasOuterNumber = Astro.slots.has('outer-number');
-
-const hasOuter = (hasOuterSingle && hasOuterPlural) || hasOuterNumber;
-
-if (hasOuterSingle !== hasOuterPlural) {
-    throw new Error(
-        `'Join' component cannot have 'outer-single' nor 'outer-plural' slots without having both.\n` +
-        `Missing slot: '${!hasOuterSingle ? 'outer-single' : 'outer-plural'}'.\n` +
-        `\n` +
-        `Tip 1: If the 'Join' component's outer doesn't change depending on whether the contents is singular vs plural, ` +
-        `consider wrapping the component itself insead of using the 'outer-' slots.\n` +
-        `\n` +
-        `Tip 2: If the 'Join' component's outer changes depending on a function of the number of elements, ` +
-        `consider using the 'outer-number' slot instead of the 'outer-plural' slot.`
-    );
-}
-
-if (hasOuterNumber && (hasOuterSingle || hasOuterPlural)) {
-    throw new Error(
-        `'Join' component cannot have 'outer-single' nor 'outer-plural' slots alongside 'outer-number' slot.\n` +
-        `\n` +
-        `Tip 1: If the 'Join' component's outer only changes depending on whether the contents is singular vs plural, ` +
-        `consider using the 'outer-single' and 'outer-plural' slots without the 'outer-number' slot.\n` +
-        `\n` +
-        `Tip 2: If the 'Join' component's outer changes depending on a function of the number of elements ` +
-        `IN ADDITION TO whether the contents is singular vs plural, ` +
-        `consider using the 'outer-number' slot with a condition for handling 1-element instances.`
-    );
-}
 ---
 
 {async () => {
-    const inner = list.map(async (item, index) => {
+    if (list === undefined) {
+        return Astro.slots.has('if-undefined')
+            ? await Astro.slots.render('if-undefined')
+            : undefined;
+    }
+
+    const inner = await Promise.all(list.map(async (item, index) => {
         /// Template
 
         const isFinal = index === list.length - 1;
@@ -58,7 +40,7 @@ if (hasOuterNumber && (hasOuterSingle || hasOuterPlural)) {
 
         const sepIndex = prevIndex;
 
-        const separator = hasSeparator && index > 0
+        const separator = Astro.slots.has('separator') && index > 0
             ? await Astro.slots.render('separator', [item, sepIndex, list, list[prevIndex], isFinal])
             : undefined;
 
@@ -67,13 +49,9 @@ if (hasOuterNumber && (hasOuterSingle || hasOuterPlural)) {
         // console.log('item', index, `(${isFinal ? 'the' : 'not the'} final item)`, 'is', item);
 
         return <>{separator}{template}</>;
-    });
+    }));
 
-    return hasOuter
-        ? hasOuterNumber
-            ? await Astro.slots.render('outer-number', [list.length, inner])
-            : list.length === 1
-                ? await Astro.slots.render('outer-single', [inner])
-                : await Astro.slots.render('outer-plural', [inner])
-        : inner
+    return Astro.slots.has('outer')
+        ? await Astro.slots.render('outer', [list.length, inner])
+        : inner;
 }}
