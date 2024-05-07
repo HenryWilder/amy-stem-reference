@@ -1,5 +1,6 @@
 ---
 import { type GlossaryEntry, type Kind } from '../scripts/glossary';
+import Katex from './Katex.astro';
 import LilRef from './LilRef.astro';
 import RefPath from './RefPath.astro';
 import Tooltip from './Tooltip.astro';
@@ -15,12 +16,14 @@ export interface Props {
 const { item, overrideKind = item.data.kind, onPage, alias } = Astro.props;
 if (item === undefined) throw new Error(`Cannot reference undefined`);
 const defaultName = item.slug.split('/').at(-1);
+
+// const brief = /(?<a>\\\((?:[^\(\)]|\g<a>)*\\\))/.exec(item.data.brief);
 ---
 
 <Tooltip>
     <LilRef item={item} overrideKind={overrideKind} onPage={onPage}><slot>{defaultName}</slot></LilRef>
     <Fragment slot="content">
         {alias && <span class="keyword">alias of </span>}<RefPath item={item} onPage={onPage}/>
-        <p>{item.data.brief}</p>
+        <p><Katex tex={'\\text{' + item.data.brief + '}'}/></p>
     </Fragment>
 </Tooltip>

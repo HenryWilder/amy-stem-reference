@@ -12,7 +12,7 @@ export type ChildOfGlossarySlug<Parent extends GlossarySlug> = Exclude<
 
 export type GlossaryEntry = CollectionEntry<'glossary'>;
 
-export type GlossaryEntryOfKind<K extends Kind> = Extract<GlossaryEntry, { data: { kind: K } }>;
+export type GlossaryEntryOfKind<K extends Kind> = GlossaryEntry & { data: { kind: K } };
 
 export type ChildOfGlossaryEntry<Parent extends GlossarySlug> = Extract<GlossaryEntry, { slug: ChildOfGlossarySlug<Parent> }>;
 
@@ -24,19 +24,23 @@ export const isEntryOfKind = <K extends Kind>(kind: K, entry: GlossaryEntry): en
 };
 
 export const isChildOf = <P extends GlossarySlug>(parent: P, child: GlossarySlug): child is ChildOfGlossarySlug<P> => {
-    return child.startsWith(parent + '/') && !child.slice(parent.length).includes('/');
+    return child.startsWith(parent + '/') && !child.slice(parent.length + 1).includes('/');
 };
 
 export const getChildren = async <P extends GlossarySlug>(parent: P, filter?: (entry: GlossaryEntry) => boolean) => {
-    return (await getCollection('glossary', (entry: GlossaryEntry) => isChildOf(parent, entry.slug) && (filter?.(entry) ?? true))) as ChildOfGlossaryEntry<P>[];
+    return (await getCollection('glossary', (entry: GlossaryEntry) => {
+        const isChild = isChildOf(parent, entry.slug) && (!filter || filter(entry));
+        console.log(`${entry.slug} ${isChild ? 'is' : 'is not'} a child of ${parent}`);
+        return isChild;
+    })) as ChildOfGlossaryEntry<P>[];
 };
 
 export const getChildrenOfKind = async <K extends Kind>(parent: GlossarySlug, kind: K, filter?: (entry: GlossaryEntry) => boolean) => {
-    return (await getChildren(parent, (entry: GlossaryEntry) => isEntryOfKind(kind, entry) && (filter?.(entry) ?? true))) as GlossaryEntryOfKind<K>[];
+    return (await getChildren(parent, (entry: GlossaryEntry) => isEntryOfKind(kind, entry) && (!filter || filter(entry)))) as GlossaryEntryOfKind<K>[];
 };
 
 export const getParent = async (item: GlossaryEntry): Promise<GlossaryEntry | undefined> => {
-    const parentSlug = item.slug.slice(0, item.slug.lastIndexOf('/')) as GlossarySlug;
+    const parentSlug = item.slug.slice(0, item.slug.lastIndexOf('/') + 1) as GlossarySlug;
     console.log(parentSlug);
     return parentSlug.length !== 0 ? await getEntry('glossary', parentSlug) : undefined;
 };

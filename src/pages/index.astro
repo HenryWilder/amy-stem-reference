@@ -38,7 +38,7 @@ const getChildrenRecursively = async (root: GlossaryEntry): Promise<GlossaryTree
 
     const immediateChildrenByKind: [Kind, GlossaryEntry[]][] = await Promise.all(kinds
         .map(async (kind) => {
-            const childItems: GlossaryEntry[] = await getChildren(item.slug, (entry) => entry.data.kind === kind);
+            const childItems: GlossaryEntry[] = await getChildrenOfKind(item.slug, kind);
             return [kind, childItems];
         })
     );
@@ -58,6 +58,7 @@ const getChildrenRecursively = async (root: GlossaryEntry): Promise<GlossaryTree
 };
 
 const modules = await getCollection('glossary', (entry) => !entry.slug.includes('/'));
+console.log(modules);
 
 const tree: GlossaryTreeNode[] = await Promise.all(modules.map(getChildrenRecursively));
 
@@ -72,7 +73,7 @@ const debugTreeRecursively = (nodes: GlossaryTreeNode[]) => {
         console.groupEnd();
     });
 }
-// debugTreeRecursively(tree);
+debugTreeRecursively(tree);
 ---
 
 <!-- <Katex tex={`{\\color{deepskyblue}{f}} ({\\color{lightgreen}{${anim('x', 'y', 'z')}}}) = 2{\\color{tomato}{${anim('x', 'y', 'z', 'w')}}}`}/> -->
@@ -133,12 +134,14 @@ const debugTreeRecursively = (nodes: GlossaryTreeNode[]) => {
                                         switch (item.data.kind) {
                                             // Methods
                                             case 'function':
-                                                type ReturnOrParameter = GlossaryEntryOfKind<'return' | 'parameter'>;
+                                                type ParameterEntry = GlossaryEntryOfKind<'parameter'>;
+                                                type ReturnEntry = GlossaryEntryOfKind<'return'>;
+                                                type ReturnOrParameter = ReturnEntry | ParameterEntry;
 
-                                                const parameters: GlossaryEntryOfKind<'parameter'>[] =
+                                                const parameters: ParameterEntry[] =
                                                     (await getChildrenOfKind(item.slug, 'parameter'));
 
-                                                const returns: GlossaryEntryOfKind<'return'>[] =
+                                                const returns: ReturnEntry[] =
                                                     (await getChildrenOfKind(item.slug, 'return'));
 
                                                 const ioList = (delim: 'paren' | 'brace', source: ReturnOrParameter[]) =>
@@ -244,7 +247,7 @@ const debugTreeRecursively = (nodes: GlossaryTreeNode[]) => {
                                             <Fragment slot="tooltip">
                                                 The <Keyword tkn={item.data.kind}/> by the name of "<LilRef item={item}/>".
                                                 <br/>
-                                                {aliasRefs && <>
+                                                {aliasRefs.length !== 0 && <>
                                                     (aka {aliasRefs[0]}{aliasRefs.slice(1).map((ref) => <>, {ref}</>)})
                                                 </>}
                                                 <br/>
@@ -297,6 +300,7 @@ const debugTreeRecursively = (nodes: GlossaryTreeNode[]) => {
                             </Fragment>
                         </Comment>
                         <div class="item-description">
+                            <Katex tex={`\\text{${item.data.brief}}`}/>
                             <Description/>
                         </div>
 
