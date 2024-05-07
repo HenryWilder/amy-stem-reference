@@ -1,7 +1,20 @@
 ---
 import { getCollection } from "astro:content";
 import PageBase from "../layouts/PageBase.astro";
-import { kinds, type GlossaryEntry, type Kind, getChildren, getParent } from "../scripts/glossary";
+import {
+    kinds,
+    getChildren,
+    getChildrenOfKind,
+    getParent,
+    type GlossaryEntry,
+    type Kind,
+    type GlossaryRef,
+    type ChildOfGlossaryRef,
+    type GlossaryEntryOfKind,
+    type ChildOfGlossaryEntry,
+    type GlossarySlug,
+    type ChildOfGlossarySlug
+} from "../scripts/glossary";
 import ScopeBlock from "../components/ScopeBlock.astro";
 import Ref from "../components/Ref.astro";
 import Keyword from "../components/syntax/Keyword.astro";
@@ -120,18 +133,20 @@ const debugTreeRecursively = (nodes: GlossaryTreeNode[]) => {
                                         switch (item.data.kind) {
                                             // Methods
                                             case 'function':
-                                                const parameters =
-                                                    await getChildren(item.slug, (child) => child.data.kind === 'parameter');
+                                                type ReturnOrParameter = GlossaryEntryOfKind<'return' | 'parameter'>;
 
-                                                const returns =
-                                                    await getChildren(item.slug, (child) => child.data.kind === 'return');
+                                                const parameters: GlossaryEntryOfKind<'parameter'>[] =
+                                                    (await getChildrenOfKind(item.slug, 'parameter'));
 
-                                                const ioList = (delim: 'paren' | 'brace', source: GlossaryEntry[]) =>
+                                                const returns: GlossaryEntryOfKind<'return'>[] =
+                                                    (await getChildrenOfKind(item.slug, 'return'));
+
+                                                const ioList = (delim: 'paren' | 'brace', source: ReturnOrParameter[]) =>
                                                     <ScopeBlock delim={delim} horizontal>
                                                         <Join list={source}>
-                                                            {(srcItem: GlossaryEntry) => {
+                                                            {(srcItem: ReturnOrParameter) => {
                                                                 const param = <Ref item={srcItem}/>;
-                                                                const paramType = <TypeUnion list={srcItem.data.typeUnion!}/>;
+                                                                const paramType = <TypeUnion list={srcItem.data.typeUnion}/>;
                                                                 return <>
                                                                     {param}<Keyword
                                                                         tkn="type annotation"
@@ -192,7 +207,7 @@ const debugTreeRecursively = (nodes: GlossaryTreeNode[]) => {
                                             // Types and Traits
                                             case 'type':
                                             case 'trait':
-                                                const traits = item.data.traits && await getEntries(item.data.traits);
+                                                const traits = 'traits' in item.data && await getEntries(item.data.traits);
 
                                                 const traitOrType = <Ref item={item}/>;
 
@@ -208,7 +223,7 @@ const debugTreeRecursively = (nodes: GlossaryTreeNode[]) => {
                                                 return <>
                                                     <Keyword tkn={item.data.kind}/>
                                                     {traitOrType}
-                                                    {item.data.traits && <>
+                                                    {'traits' in item.data && <>
                                                         <Keyword tkn="implements" prev={traitOrType} next={traitList}/>
                                                         {traitList}
                                                     </>}
@@ -286,7 +301,7 @@ const debugTreeRecursively = (nodes: GlossaryTreeNode[]) => {
                         </div>
 
                         {/* Notation */}
-                        {item.data.notation && <>
+                        {'notation' in item.data && item.data.notation && <>
                             <Comment hDepth={innerDepth}>
                                 Notation
                                 <Fragment slot="tooltip">

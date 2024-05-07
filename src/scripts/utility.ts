@@ -1,36 +1,153 @@
-/**
- * Union of all value types present in T.
- */
-export type valueof<T> = T[keyof T];
+/** Require `T = Parts.join(Separator)` */
+export type JoinedString<Parts extends string[], Separator extends string> = Parts extends []
+    ? ''
+    : Parts extends [infer Only extends string]
+    ? Only
+    : Parts extends [infer First extends string, ...infer Rest extends string[]]
+    ? `${First}${Separator}${JoinedString<Rest, Separator>}`
+    : never;
 
-/**
- * The never of all properties in T.
- */
-export type NeverAny<T> = { [P in keyof T]: never };
+// Tests
+{
+    {
+        let mustBeEmpty: JoinedString<[], '/'>;
 
-/**
- * The undefinition of all properties in T.
- * Allows properties to still be accessed even if they shouldn't exist.
- */
-export type UndefineAll<T> = { [P in keyof T]?: undefined };
+        // @ts-expect-no-error
+        mustBeEmpty = '';
 
-/**
- * The exclusion of all X properties present in T.
- * Equivalent to setminus.
- */
-export type Without<T, X> = { [P in keyof (T | X)]: Exclude<T[P], X[P]> };
+        // @ts-expect-error
+        mustBeEmpty = 'apple';
 
-/**
- * The intersection of Y and M if a value compatible with M is assigned; the intersection of N and (F - M) otherwise.
- * @param F Full range of options for narrowing match
- * @param M Match pattern
- * @param Y Type when yes matching
- * @param N Type when not matching (defaults to the un-definition of all properties in Y)
- *
- * @example
- * ```
- * type Fruit = 'apple' | 'orange' | 'banana' | 'mango';
- * const apple: Conditional<T, 'banana', { isPeeled: boolean }>
- * ```
- */
-export type Conditional<F, M, Y, N = NeverAny<Y>> = (M & Y) | (Without<F, M> & N);
+        // @ts-expect-error
+        mustBeEmpty = 'apple/orange';
+    }
+
+    {
+        let mustBeApple: JoinedString<['apple'], '/'>;
+
+        // @ts-expect-error
+        mustBeApple = '';
+
+        // @ts-expect-no-error
+        mustBeApple = 'apple';
+
+        // @ts-expect-error
+        mustBeApple = 'apple/orange';
+    }
+
+    {
+        let mustBeAppleOrange: JoinedString<['apple', 'orange'], '/'>;
+
+        // @ts-expect-error
+        mustBeAppleOrange = 'apple';
+
+        // @ts-expect-no-error
+        mustBeAppleOrange = 'apple/orange';
+
+        // @ts-expect-error
+        mustBeAppleOrange = 'apple/banana';
+    }
+
+    {
+        let mustBeAppleOrangeBanana: JoinedString<['apple', 'orange', 'banana'], '/'>;
+
+        // @ts-expect-error
+        mustBeAppleOrangeBanana = 'apple';
+
+        // @ts-expect-error
+        mustBeAppleOrangeBanana = 'apple/orange';
+
+        // @ts-expect-no-error
+        mustBeAppleOrangeBanana = 'apple/orange/banana';
+
+        // @ts-expect-error
+        mustBeAppleOrangeBanana = 'apple/orange/mango';
+    }
+
+    {
+        let mustBeHyphenSeparated: JoinedString<['apple', 'orange', 'banana'], '-'>;
+
+        // @ts-expect-error
+        mustBeHyphenSeparated = 'apple';
+
+        // @ts-expect-error
+        mustBeHyphenSeparated = 'apple-orange';
+
+        // @ts-expect-no-error
+        mustBeHyphenSeparated = 'apple-orange-banana';
+
+        // @ts-expect-error
+        mustBeHyphenSeparated = 'apple-orange-mango';
+    }
+
+    {
+        let mustBeEllipsisSeparated: JoinedString<['apple', 'orange', 'banana'], '...'>;
+
+        // @ts-expect-error
+        mustBeEllipsisSeparated = 'apple';
+
+        // @ts-expect-error
+        mustBeEllipsisSeparated = 'apple...orange';
+
+        // @ts-expect-no-error
+        mustBeEllipsisSeparated = 'apple...orange...banana';
+
+        // @ts-expect-error
+        mustBeEllipsisSeparated = 'apple...orange...mango';
+    }
+}
+
+/** Require `T = Parts.concat()` */
+export type ConcatenatedString<Parts extends string[]> = JoinedString<Parts, ''>;
+
+/** Require `T = Full.split(Separator)` */
+export type SplitString<Full extends string, Separator extends string> = Full extends ''
+    ? []
+    : Full extends `${infer Prefix}${Separator}${infer Suffix}`
+    ? [...SplitString<Prefix, Separator>, ...SplitString<Suffix, Separator>]
+    : [Full];
+
+// Tests
+{
+    {
+        let mustBeEmpty: SplitString<'', '/'>;
+
+        // @ts-expect-no-error
+        mustBeEmpty = [];
+
+        // @ts-expect-error
+        mustBeEmpty = [''];
+
+        // @ts-expect-error
+        mustBeEmpty = ['apple'];
+    }
+
+    {
+        let mustBeApple: SplitString<'apple', '/'>;
+
+        // @ts-expect-error
+        mustBeApple = [];
+
+        // @ts-expect-error
+        mustBeApple = [''];
+
+        // @ts-expect-no-error
+        mustBeApple = ['apple'];
+    }
+
+    {
+        let mustBeAppleOrange: SplitString<'apple/orange', '/'>;
+
+        // @ts-expect-error
+        mustBeAppleOrange = [];
+
+        // @ts-expect-error
+        mustBeAppleOrange = [''];
+
+        // @ts-expect-error
+        mustBeAppleOrange = ['apple'];
+
+        // @ts-expect-no-error
+        mustBeAppleOrange = ['apple', 'orange'];
+    }
+}
