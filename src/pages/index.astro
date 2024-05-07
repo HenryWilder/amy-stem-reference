@@ -49,7 +49,20 @@ const getChildrenRecursively = async (root: GlossaryEntry): Promise<GlossaryTree
     const childrenByKindRecursively: [Kind, GlossaryTreeNode[]][] = await Promise.all(whereExisting
         .map(async ([kind, entries]: [Kind, GlossaryEntry[]]) => {
             const recursiveChildren: GlossaryTreeNode[] = await Promise.all(entries.map(getChildrenRecursively));
-            return [kind, recursiveChildren];
+            const sortedChildren: GlossaryTreeNode[] = recursiveChildren.sort(({ item: a }: GlossaryTreeNode, { item: b }: GlossaryTreeNode) => {
+                console.log(`${a.slug} requires [${a.data.requires.map(({slug}) => slug).join(', ')}] and ${b.slug} requires [${b.data.requires.map(({slug}) => slug).join(', ')}]`);
+                if (a.data.requires.map(({slug})=>slug).includes(b.slug)) {
+                    console.log(`${a.slug} is > ${b.slug}`);
+                    return 1;
+                }
+                if (b.data.requires.map(({slug})=>slug).includes(a.slug)) {
+                    console.log(`${a.slug} is < ${b.slug}`);
+                    return -1;
+                }
+                console.log(`${a.slug} is neither < nor > ${b.slug}`);
+                return a.slug.localeCompare(b.slug);
+            });
+            return [kind, sortedChildren];
         })
     );
 
@@ -106,14 +119,13 @@ debugTreeRecursively(tree);
     </Fragment>
     <main>
     {() => {
-        const renderTree = async (nodes: GlossaryTreeNode[], depth: number) => {
+        const renderTree = async (nodes: GlossaryTreeNode[]) => {
             return nodes.map(async (node: GlossaryTreeNode) => {
                 const { item } = node;
                 const renderedChildren = await Promise.all(node.childrenByKind.map(
-                    async ([kind, children]): Promise<[Kind, any[]]> => [kind, await renderTree(children, depth + 2)]
+                    async ([kind, children]): Promise<[Kind, any[]]> => [kind, await renderTree(children)]
                 ));
                 const Description = (await item.render()).Content;
-                const innerDepth = depth + 1;
                 return <>
                     <ScopeBlock>
                         {/* Title */}
@@ -226,7 +238,7 @@ debugTreeRecursively(tree);
                                                 return <>
                                                     <Keyword tkn={item.data.kind}/>
                                                     {traitOrType}
-                                                    {'traits' in item.data && <>
+                                                    {'traits' in item.data && item.data.traits.length !== 0 && <>
                                                         <Keyword tkn="implements" prev={traitOrType} next={traitList}/>
                                                         {traitList}
                                                     </>}
@@ -242,8 +254,8 @@ debugTreeRecursively(tree);
                                     })();
 
                                     return <>
-                                        <Comment hDepth={depth} id={id}>
-                                            The <LilRef item={item}/> {item.data.kind}
+                                        <Comment hDepth={1} id={id}>
+                                            <LilRef item={item}/>
                                             <Fragment slot="tooltip">
                                                 The <Keyword tkn={item.data.kind}/> by the name of "<LilRef item={item}/>".
                                                 <br/>
@@ -264,7 +276,7 @@ debugTreeRecursively(tree);
 
                         {/* Aliases */}
                         {Object.keys(item.data.aliases).length !== 0 && <>
-                            <Comment hDepth={innerDepth}>
+                            <Comment hDepth={2}>
                                 Aliases
                                 <Fragment slot="tooltip">
                                     Other names <LilRef item={item}/> may go by.
@@ -293,7 +305,7 @@ debugTreeRecursively(tree);
                         </>}
 
                         {/* Description */}
-                        <Comment hDepth={innerDepth}>
+                        <Comment hDepth={2}>
                             Description
                             <Fragment slot="tooltip">
                                 Description of <Keyword tkn={item.data.kind}/> <LilRef item={item}/>.
@@ -301,20 +313,40 @@ debugTreeRecursively(tree);
                         </Comment>
                         <div class="item-description">
                             <Katex tex={`\\text{${item.data.brief}}`}/>
+                        </div>
+                        <div class="item-description">
                             <Description/>
                         </div>
 
                         {/* Notation */}
-                        {'notation' in item.data && item.data.notation && <>
-                            <Comment hDepth={innerDepth}>
+                        {'notation' in item.data && <>
+                            <Comment hDepth={2}>
                                 Notation
                                 <Fragment slot="tooltip">
                                     Notation for <Keyword tkn={item.data.kind}/> <LilRef item={item}/>.
                                 </Fragment>
                             </Comment>
                             <div class="item-description">
-                                <Katex tex={item.data.notation}/>
+                                <Katex tex={'\\Large ' + item.data.notation}/>
                             </div>
+                        </>}
+
+                        {/* Examples */}
+                        {'examples' in item.data && item.data.examples && <>
+                            <Comment hDepth={2}>
+                                Examples
+                                <Fragment slot="tooltip">
+                                    Examples of <Keyword tkn={item.data.kind}/> <LilRef item={item}/>.
+                                </Fragment>
+                            </Comment>
+                            <Katex tex={
+                                '\\large \\begin{matrix*}[l]' +
+                                item.data.examples.map((ex) => typeof ex !== 'string'
+                                    ? `${ex.math}\\\\[-0.25em]\\textit{\\footnotesize\\gray{${ex.name}}}`
+                                    : ex
+                                ).join('\\\\[1.5em]') +
+                                '\\end{matrix*}'
+                            }/>
                         </>}
 
                         {/* Children */}
@@ -356,7 +388,7 @@ debugTreeRecursively(tree);
                             };
                             const { text, desc } = mapping[kind];
                             return <>
-                                <Comment hDepth={innerDepth}>
+                                <Comment hDepth={2}>
                                     {text}
                                     <Fragment slot="tooltip">
                                         {desc} the <LilRef item={item}/> {item.data.kind}.
@@ -371,7 +403,7 @@ debugTreeRecursively(tree);
                 </>
             });
         }
-        return tree.map((module) => <div class="module-column">{renderTree([module], 1)}</div>);
+        return tree.map((module) => <div class="module-column">{renderTree([module])}</div>);
     }}
     </main>
 </PageBase>

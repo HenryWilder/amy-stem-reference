@@ -8,6 +8,19 @@ const glossaryCollection = defineCollection({
     schema: z.intersection(
         z.object({
             brief: z.string().describe('what appears on the tooltip'),
+            requires: z.array(reference('glossary')).default([]).describe('items that should be sorted in front of this item'),
+            examples: z
+                .array(
+                    z.union([
+                        z.object({
+                            name: z.string().describe('the name of the example'),
+                            math: z.string().describe("the example's katex"),
+                        }),
+                        z.string().describe("the example's katex"),
+                    ])
+                )
+                .min(1)
+                .optional(),
             aliases: z.record(z.string().describe('the name of the alias'), z.enum(kinds).describe('the kind of the alias')).default({}),
             isStatic: z.boolean().default(false).describe('whether the object is external to its container'),
         }),

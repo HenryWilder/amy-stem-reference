@@ -256,7 +256,7 @@ table.parameter-list {
     flex-flow: row nowrap;
     /* todo: consider wrapping? */
     align-items: flex-start;
-    gap: 4em;
+    gap: 8em;
 }
 
 /* syntax highlighting */

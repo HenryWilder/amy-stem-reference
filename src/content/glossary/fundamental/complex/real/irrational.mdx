@@ -1,0 +1,20 @@
+---
+slug: fundamental/Complex/Real/Irrational
+kind: type
+requires:
+- fundamental/Complex/Real/Rational
+brief: 'A real number which is not rational.'
+notation: \mathbb{P}
+examples:
+- \sqrt{3}
+- \sqrt{5}
+- \sqrt[3]{2}
+- \pi
+- \frac{3}{\pi^2}
+---
+import Katex from '/./src/components/Katex.astro';
+import Ref from '/./src/components/MdxRef.astro';
+export const real = "fundamental/Complex/Real";
+export const rational = "fundamental/Complex/Real/Rational";
+
+A number which, while <Ref slug={real}/>, cannot be expressed as a <Ref slug={rational}/> number.
