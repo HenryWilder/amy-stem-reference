@@ -12,12 +12,12 @@ export type ChildOfGlossarySlug<Parent extends GlossarySlug> = Exclude<
 
 export type GlossaryEntry = CollectionEntry<'glossary'>;
 
-export type GlossaryEntryOfKind<K extends Kind> = GlossaryEntry & { data: { kind: K } };
+export type GlossaryEntryOfKind<K extends Kind> = Extract<GlossaryEntry, { data: { kind: K } }>;
 
-export type ChildOfGlossaryEntry<Parent extends GlossarySlug> = GlossaryEntry & { slug: ChildOfGlossarySlug<Parent> };
+export type ChildOfGlossaryEntry<Parent extends GlossarySlug> = Extract<GlossaryEntry, { slug: ChildOfGlossarySlug<Parent> }>;
 
 export type GlossaryRef = { collection: 'glossary'; slug: GlossarySlug };
-export type ChildOfGlossaryRef<Parent extends GlossarySlug> = GlossaryRef & { slug: ChildOfGlossarySlug<Parent> };
+export type ChildOfGlossaryRef<Parent extends GlossarySlug> = Extract<GlossaryRef, { slug: ChildOfGlossarySlug<Parent> }>;
 
 export const isEntryOfKind = <K extends Kind>(kind: K, entry: GlossaryEntry): entry is GlossaryEntryOfKind<K> => {
     return entry.data.kind === kind;
