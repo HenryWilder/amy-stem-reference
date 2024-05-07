@@ -1,0 +1,33 @@
+---
+slug: fundamental/Rational
+kind: type
+brief: '\(
+    \frac{m}{n}
+    \animAside{\mid m,n \in \Z, n \ne 0}
+\)'
+notation: \Q
+---
+import Katex from '/./src/components/Katex.astro';
+import Ref from '/./src/components/MdxRef.astro';
+export const integer = "fundamental/Integer"
+
+A fraction whose numerator and denominator are both <Ref slug={integer}>integers</Ref>.
+
+The denominator cannot be 0, which is undefined.
+
+**Examples**
+
+<Katex tex='
+\begin{matrix}
+    \frac{1}{2} &
+    -\frac{3}{7} &
+    \animCycle{
+        \animItem{46}
+        \animItem{\frac{46}{1}}
+    } &
+    \animCycle{
+        \animItem{0.17}
+        \animItem{\frac{17}{100}}
+    }
+\end{matrix}
+'/>

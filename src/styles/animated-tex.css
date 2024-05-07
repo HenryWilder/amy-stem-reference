@@ -21,8 +21,8 @@
 .katex:has(.anim-box):hover {
     .anim-element {
         opacity: 100%;
-        max-width: max-content !important;
-        width: max-content !important;
+        max-width: max-content;
+        width: max-content;
 
         &:first-of-type::before {
             content: '(';

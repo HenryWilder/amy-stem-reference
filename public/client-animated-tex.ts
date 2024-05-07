@@ -36,4 +36,4 @@ setInterval(() => {
         }
         data.currentTick = newTick;
     }
-}, 2000);
+}, 3000);

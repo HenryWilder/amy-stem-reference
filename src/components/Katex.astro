@@ -18,10 +18,13 @@ const tooltipText = 'tooltiptext'  as const;
 
 const macros = {
     // #1 is content
-    "\\animBox": `\\htmlClass{${animBox}}{#1}`,
+    "\\animCycle": `\\htmlClass{${animBox}}{#1}`,
 
     // #1 is content
-    "\\animElement": `\\htmlClass{${animElement}}{#1}`,
+    "\\animItem": `\\htmlClass{${animElement}}{#1}`,
+
+    // #1 is content
+    "\\animAside": `\\animCycle{\\animItem{\\gray{#1}}\\animItem{\\phantom{#1}}}`,
 
     // #1 is content
     // #2 is tooltip
@@ -37,26 +40,32 @@ const macros = {
     // #4 is tooltip
     "\\fullref": `\\tooltip{\\kind{#2}{\\href{#1}{#3}}}{#4}`,
 
-    // binary horizontal 'or'
-    "\\bhor": `\\;\\text{or}\\;`,
+    // cases 'if'
+    "\\if": `\\text{if}\;`,
 
-    // quad horizontal 'or'
-    "\\qhor": `\\quad\\text{or}\\quad`,
+    ...Object.fromEntries(['and', 'or', 'where'].flatMap((word) => [
+        // binary horizontal
+        [`\\bh${word}`, `\\;\\text{${word}}\\;`],
 
-    // 1em vertical 'or'
-    "\\bvor": `\\[1em]\\text{or}\\[1em]`,
+        // quad horizontal
+        [`\\qh${word}`, `\\quad\\text{${word}}\\quad`],
 
-    // 2em vertical 'or'
-    "\\qvor": `\\[2em]\\text{or}\\[2em]`,
+        // 1em vertical
+        [`\\bv${word}`, `\\[1em]\\text{${word}}\\[1em]`],
+
+        // 2em vertical
+        [`\\qv${word}`, `\\[2em]\\text{${word}}\\[2em]`],
+    ])),
+
+    "\\Q": `\\mathbb{Q}`,
 } as const;
-
 
 
 let modifiedTex = tex;
 for (const preproc of preprocs) {
     modifiedTex = await preproc(modifiedTex);
 }
-console.log(`the tex '${tex}' became '${modifiedTex}'`); // debug
+// console.log(`the tex '${tex}' became '${modifiedTex}'`); // debug
 ---
 
 <Fragment set:html={katex.renderToString(modifiedTex, { trust: true, macros: macros, strict: 'ignore' })} />

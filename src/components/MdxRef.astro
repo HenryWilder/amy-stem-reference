@@ -1,12 +1,12 @@
 ---
 import { getEntry } from "astro:content";
 import Ref from "./Ref.astro";
-import type { GlossaryEntry } from "../scripts/glossary";
+import type { GlossaryEntry, GlossarySlug } from "../scripts/glossary";
 import type { CollectionEntry } from "astro:content";
 import LilRef from "./LilRef.astro";
 
 interface Props {
-    slug: string;
+    slug: GlossarySlug;
 }
 
 const { slug } = Astro.props;

@@ -263,7 +263,7 @@ debugTreeRecursively(tree);
                         </Fragment>
 
                         {/* Aliases */}
-                        {item.data.aliases && <>
+                        {Object.keys(item.data.aliases).length !== 0 && <>
                             <Comment hDepth={innerDepth}>
                                 Aliases
                                 <Fragment slot="tooltip">

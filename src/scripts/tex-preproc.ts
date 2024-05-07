@@ -145,7 +145,7 @@ export const preprocs: Preprocessor[] = [
             const tooltip = `\\text{${item.data.brief}}`;
             const name = content ?? `\\text{${slug.split('/').at(-1)}}`;
             const fullRef = `\\fullref{${href}}{${kind}}{${name}}{${tooltip}}`;
-            console.log(`replaced '${_substring}' with '${fullRef}'`); // debug
+            // console.log(`replaced '${_substring}' with '${fullRef}'`); // debug
             return fullRef;
         });
     },

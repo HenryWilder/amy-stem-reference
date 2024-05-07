@@ -30,7 +30,7 @@ export const isChildOf = <P extends GlossarySlug>(parent: P, child: GlossarySlug
 export const getChildren = async <P extends GlossarySlug>(parent: P, filter?: (entry: GlossaryEntry) => boolean) => {
     return (await getCollection('glossary', (entry: GlossaryEntry) => {
         const isChild = isChildOf(parent, entry.slug) && (!filter || filter(entry));
-        console.log(`${entry.slug} ${isChild ? 'is' : 'is not'} a child of ${parent}`);
+        // console.log(`${entry.slug} ${isChild ? 'is' : 'is not'} a child of ${parent}`);
         return isChild;
     })) as ChildOfGlossaryEntry<P>[];
 };
@@ -41,6 +41,6 @@ export const getChildrenOfKind = async <K extends Kind>(parent: GlossarySlug, ki
 
 export const getParent = async (item: GlossaryEntry): Promise<GlossaryEntry | undefined> => {
     const parentSlug = item.slug.slice(0, item.slug.lastIndexOf('/') + 1) as GlossarySlug;
-    console.log(parentSlug);
+    // console.log(parentSlug);
     return parentSlug.length !== 0 ? await getEntry('glossary', parentSlug) : undefined;
 };
