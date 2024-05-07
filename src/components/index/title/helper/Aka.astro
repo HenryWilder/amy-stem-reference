@@ -1,0 +1,26 @@
+---
+import type { GlossaryEntry, Kind } from '../../../../scripts/glossary';
+import Join from '../../../Join.astro';
+import LilRef from '../../../LilRef.astro';
+
+interface Props {
+    item: GlossaryEntry;
+}
+
+const { item } = Astro.props;
+
+const aliases: [string, Kind][] = item.data.aliases && Object.entries(item.data.aliases);
+---
+
+{aliases.length !== 0 && <>
+    (aka <Join list={aliases}>
+        {([alias, aliasKind]: [string, Kind]) =>
+            <LilRef item={item} overrideKind={aliasKind}>
+                {alias}
+            </LilRef>
+        }
+        <span slot="separator">
+            {() => <>, </>}
+        </span>
+    </Join>)
+</>}

@@ -1,0 +1,21 @@
+---
+import type { GlossaryEntryOfKind } from '../../../scripts/glossary';
+import Ref from '../../Ref.astro';
+import Keyword from '../../syntax/Keyword.astro';
+import TypeUnion from '../../TypeUnion.astro';
+
+interface Props {
+    item: GlossaryEntryOfKind<'field'>;
+}
+
+const { item } = Astro.props;
+---
+{() => {
+    const field = <Ref item={item}/>;
+    const fieldType = <TypeUnion list={item.data.typeUnion!}/>;
+    return <>
+        <Keyword tkn={item.data.kind} what={field}/>
+        {field}<Keyword tkn="type annotation" prev={field} next={fieldType}/>
+        {fieldType}<Keyword tkn="end of statement"/>
+    </>
+}}

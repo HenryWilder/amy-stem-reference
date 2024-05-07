@@ -44,3 +44,99 @@ export const getParent = async (item: GlossaryEntry): Promise<GlossaryEntry | un
     // console.log(parentSlug);
     return parentSlug.length !== 0 ? await getEntry('glossary', parentSlug) : undefined;
 };
+
+// ---
+
+export interface GlossaryTreeNode {
+    item: GlossaryEntry;
+    childrenByKind: [Kind, GlossaryTreeNode[]][];
+}
+
+const getChildrenRecursively = async (root: GlossaryEntry): Promise<GlossaryTreeNode> => {
+    const item: GlossaryEntry = root;
+
+    const immediateChildrenByKind: [Kind, GlossaryEntry[]][] = await Promise.all(
+        kinds.map(async (kind) => {
+            const childItems: GlossaryEntry[] = await getChildrenOfKind(item.slug, kind);
+            return [kind, childItems];
+        })
+    );
+
+    const whereExisting: [Kind, GlossaryEntry[]][] = immediateChildrenByKind.filter(([_, entries]) => entries.length !== 0);
+
+    const childrenByKindRecursively: [Kind, GlossaryTreeNode[]][] = await Promise.all(
+        whereExisting.map(async ([kind, entries]: [Kind, GlossaryEntry[]]) => {
+            const recursiveChildren: GlossaryTreeNode[] = await Promise.all(entries.map(getChildrenRecursively));
+            const sortedChildren: GlossaryTreeNode[] = recursiveChildren.sort(({ item: a }: GlossaryTreeNode, { item: b }: GlossaryTreeNode) => {
+                console.log(
+                    `${a.slug} requires [${a.data.requires.map(({ slug }) => slug).join(', ')}] and ${b.slug} requires [${b.data.requires
+                        .map(({ slug }) => slug)
+                        .join(', ')}]`
+                );
+                if (a.data.requires.map(({ slug }) => slug).includes(b.slug)) {
+                    console.log(`${a.slug} is > ${b.slug}`);
+                    return 1;
+                }
+                if (b.data.requires.map(({ slug }) => slug).includes(a.slug)) {
+                    console.log(`${a.slug} is < ${b.slug}`);
+                    return -1;
+                }
+                console.log(`${a.slug} is neither < nor > ${b.slug}`);
+                return a.slug.localeCompare(b.slug);
+            });
+            return [kind, sortedChildren];
+        })
+    );
+
+    const node: GlossaryTreeNode = { item, childrenByKind: childrenByKindRecursively };
+    return node;
+};
+
+const modules = await getCollection('glossary', (entry) => !entry.slug.includes('/'));
+console.log(modules);
+
+export const tree: GlossaryTreeNode[] = await Promise.all(modules.map(getChildrenRecursively));
+
+// Debug
+const debugTreeRecursively = (nodes: GlossaryTreeNode[]) => {
+    nodes.forEach((node: GlossaryTreeNode) => {
+        console.group('- ' + node.item.slug.split('/').at(-1));
+        node.childrenByKind.forEach(([kind, children]: [Kind, GlossaryTreeNode[]]) => {
+            console.log(kind);
+            debugTreeRecursively(children);
+        });
+        console.groupEnd();
+    });
+};
+debugTreeRecursively(tree);
+
+export const memberHeadings = {
+    function: {
+        text: 'Methods',
+        desc: 'Member functions associated with',
+    },
+    type: {
+        text: 'Types',
+        desc: 'Subtypes of',
+    },
+    field: {
+        text: 'Fields',
+        desc: 'Member variables on',
+    },
+    parameter: {
+        text: 'Arguments',
+        desc: 'Inputs to',
+    },
+    return: {
+        text: 'Returns',
+        desc: 'Outputs from',
+    },
+    trait: {
+        text: 'Traits',
+        desc: 'Member traits from',
+    },
+    constant: {
+        text: 'Constants',
+        desc: 'Constants associated with',
+    },
+};

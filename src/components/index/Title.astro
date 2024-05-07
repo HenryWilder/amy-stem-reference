@@ -1,0 +1,61 @@
+---
+import { getParent, isEntryOfKind, type GlossaryEntry } from '../../scripts/glossary';
+import LilRef from '../LilRef.astro';
+import RefPath from '../RefPath.astro';
+import Comment from '../syntax/Comment.astro';
+import Keyword from '../syntax/Keyword.astro';
+import BasicTitle from './title/BasicTitle.astro';
+import Field from './title/Field.astro';
+import Aka from './title/helper/Aka.astro';
+import Method from './title/Method.astro';
+import ParamOrReturn from './title/ParamOrReturn.astro';
+import TypeOrTrait from './title/TypeOrTrait.astro';
+
+interface Props {
+    item: GlossaryEntry;
+}
+
+const { item } = Astro.props;
+
+const id = item.slug.replace(/\//g, '+');
+const parentItem = await getParent(item);
+---
+
+<Comment hDepth={1} id={id}>
+    <LilRef item={item}/>
+    <Fragment slot="tooltip">
+        The <Keyword tkn={item.data.kind}/> by the name of "<LilRef item={item}/>".
+        <br/>
+        <Aka item={item}/>
+        <br/>
+        <br/>
+        {parentItem && <>
+            Associated with <Keyword tkn={parentItem.data.kind}/> <RefPath item={parentItem}/>.
+        </>}
+    </Fragment>
+</Comment>
+
+{item.data.isStatic && <Keyword tkn="static"/>}
+
+{() => {
+    if (isEntryOfKind('function', item))
+    {
+        return <Method item={item}/>;
+    }
+    else if (isEntryOfKind('field', item))
+    {
+        return <Field item={item}/>;
+    }
+    else if (isEntryOfKind('parameter', item) || isEntryOfKind('return', item))
+    {
+        return <ParamOrReturn item={item}/>;
+    }
+    else if (isEntryOfKind('type', item) || isEntryOfKind('trait', item))
+    {
+        return <TypeOrTrait item={item}/>;
+    }
+    else
+    {
+        return <BasicTitle item={item}/>;
+    }
+}}

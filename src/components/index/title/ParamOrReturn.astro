@@ -1,0 +1,19 @@
+---
+import type { GlossaryEntry, GlossaryEntryOfKind } from '../../../scripts/glossary';
+import Ref from '../../Ref.astro';
+import ScopeInline from '../../ScopeInline.astro';
+import Keyword from '../../syntax/Keyword.astro';
+import TypeUnion from '../../TypeUnion.astro';
+
+interface Props {
+    item: GlossaryEntryOfKind<'parameter'> | GlossaryEntryOfKind<'return'>;
+}
+
+const { item } = Astro.props;
+---
+
+<Keyword tkn={item.data.kind}/>
+<ScopeInline delim="{}" typeScope>
+    <TypeUnion list={item.data.typeUnion!}/>
+</ScopeInline>
+<Ref item={item}/>

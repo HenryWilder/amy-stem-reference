@@ -1,8 +1,6 @@
 import { z, defineCollection, reference } from 'astro:content';
 import { kinds } from '../scripts/glossary';
 
-type Test = { a: 2 } | (({ a: 0 } | { a: 1; b: 0 }) & { c: 0 });
-
 const glossaryCollection = defineCollection({
     type: 'content',
     schema: z.intersection(
@@ -27,7 +25,7 @@ const glossaryCollection = defineCollection({
         z.union([
             // has nothing
             z.object({
-                kind: z.enum(kinds).exclude(['field', 'parameter', 'return', 'function', 'constant', 'type']),
+                kind: z.enum(['module']),
             }),
             // has typeUnion
             z.object({
@@ -43,8 +41,8 @@ const glossaryCollection = defineCollection({
                     }),
                     // has traits
                     z.object({
-                        kind: z.enum(['type']),
-                        traits: z.array(reference('glossary')).default([]).describe('trait(s) the type implements'),
+                        kind: z.enum(['type', 'trait']),
+                        traits: z.array(reference('glossary')).default([]).describe('trait(s) being implemented'),
                     }),
                 ]),
                 z.object({

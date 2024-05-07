@@ -1,0 +1,32 @@
+---
+import { getChildrenOfKind, type GlossaryEntryOfKind } from '../../../scripts/glossary';
+import Ref from '../../Ref.astro';
+import Keyword from '../../syntax/Keyword.astro';
+import MethodInOutList from './helper/MethodInOutList.astro';
+
+interface Props {
+    item: GlossaryEntryOfKind<'function'>;
+}
+
+const { item } = Astro.props;
+
+const parameters = await getChildrenOfKind(item.slug, 'parameter');
+const returns = await getChildrenOfKind(item.slug, 'return');
+---
+
+<Keyword tkn={item.data.kind}/>
+<Ref item={item}/>
+<div class="function-signature">
+{() => {
+    const parameterList = <MethodInOutList delim="paren" source={parameters}/>;
+    const returnList = <MethodInOutList delim="brace" source={returns}/>;
+
+    return <>
+        {parameterList}
+        <span style="font-size:2em">
+            <Keyword tkn="becomes" prev={parameterList} next={returnList}/>
+        </span>
+        {returnList}
+    </>;
+}}
+</div>

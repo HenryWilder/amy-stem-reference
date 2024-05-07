@@ -1,0 +1,95 @@
+---
+import type { Kind, GlossaryTreeNode } from '../../scripts/glossary';
+import { memberHeadings } from '../../scripts/glossary';
+import Katex from '../Katex.astro';
+import LilRef from '../LilRef.astro';
+import Ref from '../Ref.astro';
+import ScopeBlock from '../ScopeBlock.astro';
+import Comment from '../syntax/Comment.astro';
+import Keyword from '../syntax/Keyword.astro';
+import Title from './Title.astro';
+
+interface Props {
+    node: GlossaryTreeNode;
+}
+
+const { node } = Astro.props;
+
+const { item } = node;
+const Description = (await item.render()).Content;
+---
+
+<ScopeBlock>
+    {/* Title */}
+    <Title item={item} slot="summary"/>
+
+    {/* Aliases */}
+    {Object.keys(item.data.aliases).length !== 0 && <>
+        <Comment hDepth={2}>Aliases<Fragment slot="tooltip">Other names <LilRef item={item}/> may go by.</Fragment></Comment>
+        <table class="alias-list">{
+            Object.entries(item.data.aliases).map(([alias, kind]) => {
+                const aliasRef = <Ref item={item} overrideKind={kind} alias>{alias}</Ref>;
+                const aliasing = <Ref item={item}/>;
+                return <tr>
+                    <td>
+                        {/* All aliases are static */}
+                        <Keyword tkn="static"/> <Keyword tkn={kind}/>
+                    </td>
+                    <td>
+                        &nbsp;{aliasRef}
+                    </td>
+                    <td>
+                        &nbsp;<Keyword tkn={kind === item.data.kind ? 'assign' : 'similar to'} prev={aliasRef} next={aliasing}/>
+                        {aliasing}<Keyword tkn="end of statement"/>
+                    </td>
+                </tr>
+            })
+        }</table>
+    </>}
+
+    {/* Description */}
+    <Comment hDepth={2}>Description<Fragment slot="tooltip">Description of <Keyword tkn={item.data.kind}/> <LilRef item={item}/>.</Fragment>
+    </Comment>
+    <div class="item-description">
+        <Katex tex={`\\text{${item.data.brief}}`}/>
+    </div>
+    <div class="item-description">
+        <Description/>
+    </div>
+
+    {/* Notation */}
+    {'notation' in item.data && <>
+        <Comment hDepth={2}>Notation<Fragment slot="tooltip">Notation for <Keyword tkn={item.data.kind}/> <LilRef item={item}/>.</Fragment>
+        </Comment>
+        <div class="item-description">
+            <Katex tex={'\\Large ' + item.data.notation}/>
+        </div>
+    </>}
+
+    {/* Examples */}
+    {'examples' in item.data && item.data.examples && <>
+        <Comment hDepth={2}>Examples<Fragment slot="tooltip">Examples of <Keyword tkn={item.data.kind}/> <LilRef item={item}/>.</Fragment>
+        </Comment>
+        <Katex tex={
+            '\\large \\begin{matrix*}[l]' +
+            item.data.examples.map((ex) => typeof ex !== 'string'
+                ? `${ex.math}\\\\[-0.25em]\\textit{\\footnotesize\\gray{${ex.name}}}`
+                : ex
+            ).join('\\\\[1.5em]') +
+            '\\end{matrix*}'
+        }/>
+    </>}
+
+    {/* Children */}
+    {node.childrenByKind.length !== 0 && <Comment hDepth={2}>Members</Comment>}
+    {node.childrenByKind.map(([kind, childrenOfKind]) => {
+        if (kind === 'module') throw new Error('Submodules not supported');
+        const { text, desc } = memberHeadings[kind];
+        return <>
+            <Comment hDepth={3}>{text}<Fragment slot="tooltip">{desc} the <LilRef item={item}/> {item.data.kind}.</Fragment></Comment>
+            <div class="columns">
+                {childrenOfKind.map((child) => <Astro.self node={child}/>)}
+            </div>
+        </>
+    })}
+</ScopeBlock>

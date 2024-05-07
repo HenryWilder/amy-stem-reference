@@ -1,0 +1,21 @@
+---
+import type { GlossaryEntry, GlossaryEntryOfKind } from "../../../../scripts/glossary";
+import Join from "../../../Join.astro";
+import LilRef from "../../../LilRef.astro";
+import Keyword from "../../../syntax/Keyword.astro";
+
+interface Props {
+    traits: GlossaryEntryOfKind<'trait'>[];
+}
+
+const { traits } = Astro.props;
+---
+
+<Join list={traits}>
+    {(trait: GlossaryEntry) => <LilRef item={trait}/>}
+    <span slot="separator">
+        {([_prevProps, prev]: [GlossaryEntry, any], [_nextProps, next]: [GlossaryEntry, any]) =>
+            <>&nbsp;<Keyword tkn="combine traits" prev={prev} next={next}/>&nbsp;</>
+        }
+    </span>
+</Join>

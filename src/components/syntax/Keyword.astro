@@ -1,124 +1,73 @@
 ---
 import { type Kind, kinds } from '../../scripts/glossary';
-import type { Conditional } from '../../scripts/utility';
 import Tooltip from '../Tooltip.astro';
 
-const validKeywords = [
-    ...kinds,
-    'null',
-    'becomes',
-    'maps to',
-    'implies',
-    'type annotation',
-    'type union',
-    'type intersection',
-    'static',
-    'instance',
-    'member',
-    'method',
-    'property',
-    'extends',
-    'implements',
-    'assign',
-    'similar to',
-    'end of statement',
-    'separator',
-    'combine traits',
-    'for',
-    'namespace',
-] as const;
+// Todo: This seems really bloated and not all of the parts are related to each other.
+// Maybe it should be broken up into many smaller components?
 
-type ValidKindSeparator = `${'static ' | 'instance ' | ''}${Kind} separator`; // instance if blank
+export type ValidKeyword = Props['tkn'];
 
-export type ValidKeyword = (typeof validKeywords)[number] | ValidKindSeparator;
+interface Contextless {
+    tkn:
+        | 'null'
+        | 'method'
+        | 'property'
+        | 'end of statement'
+        | 'for'
+        | 'namespace';
+}
 
-type NeedsSubject =
-    never;
+interface RequiresContext {
+    tkn:
+        | 'implements'
+        | 'extends'
+        | 'assign'
+        | 'similar to'
+        | 'separator'
+        | 'becomes'
+        | 'maps to'
+        | 'implies'
+        | 'type annotation'
+        | 'type union'
+        | 'type intersection'
+        | 'combine traits'
+        | `${'static ' | 'instance ' | ''}${Kind} separator`;
 
-type AllowsSubject =
-    | 'static'
-    | 'instance'
-    | Kind;
+    /** @deprecated Gradually replacing with slots */
+    prev: any;
+    /** @deprecated Gradually replacing with slots */
+    next: any;
+}
 
-type NeedsContext =
-    | 'implements'
-    | 'extends'
-    | 'assign'
-    | 'similar to'
-    | 'separator'
-    | 'becomes'
-    | 'maps to'
-    | 'implies'
-    | 'type annotation'
-    | 'type union'
-    | 'type intersection'
-    | 'combine traits'
-    | ValidKindSeparator;
+interface PermitsContext {
+    tkn:
+        | 'member';
 
-type AllowsContext =
-    | 'member'
+    /** @deprecated Gradually replacing with slots */
+    prev?: any;
+    /** @deprecated Gradually replacing with slots */
+    next?: any;
+}
+
+interface PermitsSubject {
+    tkn:
+        | 'static'
+        | 'instance'
+        | Kind;
+
+    /** @deprecated Gradually replacing with slots */
+    what?: any;
+}
 
 type Props = {
     fullName?: true;
-} & ({
-    tkn: Exclude<ValidKeyword, NeedsContext | AllowsContext | AllowsSubject>;
-} | {
-    tkn: NeedsContext;
-    prev: any;
-    next: any;
-} | {
-    tkn: AllowsContext;
-    prev?: any;
-    next?: any;
-} | {
-    tkn: NeedsSubject;
-    what: any;
-} | {
-    tkn: AllowsSubject;
-    what?: any;
-});
+} & (Contextless | RequiresContext | PermitsContext | PermitsSubject);
 
-// // Should pass
-// const props1a: Props = {
-//     tkn: 'for',
-// }
+const { tkn, fullName } = Astro.props;
 
-// // Should fail
-// const props1b: Props = {
-//     tkn: 'for',
-//     prev: 'apple',
-//     next: 'orange',
-//     what: 'banana',
-// }
-
-// // Should fail
-// const props2a: Props = {
-//     tkn: 'implements',
-// }
-
-// // Should pass
-// const props2b: Props = {
-//     tkn: 'implements',
-//     prev: 'apple',
-//     next: 'orange',
-// }
-
-// // Should pass (implies the subject is the concept)
-// const props3a: Props = {
-//     tkn: 'constant',
-// }
-
-// // Should pass
-// const props3b: Props = {
-//     tkn: 'constant',
-//     what: 'banana',
-// }
-
-const { tkn, fullName, ...rest } = Astro.props;
-
-const prev = 'prev' in rest ? rest.prev : undefined;
-const next = 'next' in rest ? rest.next : undefined;
-const what = 'what' in rest ? rest.what : undefined;
+const prev = 'prev' in Astro.props ? (Astro.slots.has('prev') ? Astro.slots.render('prev') : Astro.props.prev) : undefined;
+const next = 'next' in Astro.props ? (Astro.slots.has('next') ? Astro.slots.render('next') : Astro.props.next) : undefined;
+const what = 'what' in Astro.props ? (Astro.slots.has('what') ? Astro.slots.render('what') : Astro.props.what) : undefined;
 
 type TokenData = { symbol: any, description: any, keywordType?: 'keyword' | 'control' | 'operator' };
 

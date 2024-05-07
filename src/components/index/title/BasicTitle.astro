@@ -1,0 +1,14 @@
+---
+import type { GlossaryEntry } from '../../../scripts/glossary';
+import Ref from '../../Ref.astro';
+import Keyword from '../../syntax/Keyword.astro';
+
+interface Props {
+    item: GlossaryEntry;
+}
+
+const { item } = Astro.props;
+---
+
+<Keyword tkn={item.data.kind}/>
+<Ref item={item}/>

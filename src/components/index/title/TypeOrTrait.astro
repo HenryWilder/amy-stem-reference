@@ -1,0 +1,30 @@
+---
+import { getEntries } from 'astro:content';
+import type { GlossaryEntry, GlossaryEntryOfKind } from '../../../scripts/glossary';
+import Ref from '../../Ref.astro';
+import Keyword from '../../syntax/Keyword.astro';
+import Join from '../../Join.astro';
+import TraitList from './helper/TraitList.astro';
+
+interface Props {
+    item: GlossaryEntryOfKind<'type'> | GlossaryEntryOfKind<'trait'>;
+}
+
+const { item } = Astro.props;
+
+const traits = 'traits' in item.data
+    ? (await getEntries(item.data.traits)) as GlossaryEntryOfKind<'trait'>[]
+    : [];
+---
+
+{() => {
+    const ref = <Ref item={item}/>;
+    const traitList = <TraitList traits={traits}/>;
+    return <>
+        <Keyword tkn={item.data.kind}/>&nbsp;{ref}
+        {'traits' in item.data && item.data.traits.length !== 0 && <>
+            <Keyword tkn="implements" prev={ref} next={traitList}/>
+            {traitList}
+        </>}
+    </>;
+}}
